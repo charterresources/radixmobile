@@ -8,6 +8,6 @@
     "wsservice" : "moodle_mobile_app",
     "wsextservice" : "local_mobile",
     "demo_sites": {"student": {"url": "http://", "username": "student", "password": "moodle"}, "teacher": {"url": "http://", "username": "teacher", "password": "moodle"}, "cva": {"url": "http://", "username": "student", "password": "student"}},
-    "gcmpn": "408602687357",
+    "gcmpn": "479226957877",
     "customurlscheme": "moodlemobile"
 }
