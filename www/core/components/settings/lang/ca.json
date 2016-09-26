@@ -1,11 +1,7 @@
 {
     "about": "Quant a",
-<<<<<<< HEAD
-    "appname": "Spark Mobile {{version}}",
-=======
-    "appname": "Moodle Mobile {{version}}",
+    "appname": "Radix Mobile {{version}}",
     "appready": "App preparada",
->>>>>>> v3.1.0
     "cacheexpirationtime": "Temps de venciment de memòria cau (milisegons)",
     "cordovadevicemodel": "Model del dispositiu Cordova",
     "cordovadeviceosversion": "Versió d'OS del dispositiu Cordova",

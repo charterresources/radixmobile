@@ -37,7 +37,7 @@ angular.module('mm.core')
  * @name $mmEvents
  * @module mm.core
  * @description
- * This service allows sending and listening to events in the Spark Mobile app.
+ * This service allows sending and listening to events in the Radix Mobile app.
  */
 .factory('$mmEvents', function($log, md5) {
 

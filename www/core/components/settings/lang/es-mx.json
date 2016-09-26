@@ -1,6 +1,6 @@
 {
     "about": "Acerca de",
-    "appname": "Spark Mobile {{version}}",
+    "appname": "Radix Mobile {{version}}",
     "cacheexpirationtime": "Tiempo de caducidad del caché (mili segundos)",
     "cordovadevicemodel": "Modelo Dispositivo Cordova",
     "cordovadeviceosversion": "Versión OS Dispositivo Cordova",

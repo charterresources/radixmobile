@@ -23,13 +23,13 @@ describe('$mmConfig', function() {
         timeout = $timeout;
 
         httpBackend.expectGET('config.json')
-            .respond(200, {'app_id': 'com.spark.sparkmobile'});
+            .respond(200, {'app_id': 'com.radix.radixmobile'});
     }));
 
     it('config can be read from config.json', function(done) {
         mmConfig.get('app_id')
             .then(function(data) {
-                expect(data).toEqual('com.spark.sparkmobile');
+                expect(data).toEqual('com.radix.radixmobile');
             }, function() {
                 except(false).toEqual(true);
             })

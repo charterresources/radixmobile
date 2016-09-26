@@ -1,11 +1,7 @@
 {
     "about": "Honi buruz",
-<<<<<<< HEAD
-    "appname": "Spark Mobile {{version}}",
-=======
-    "appname": "Moodle Mobile {{version}}",
+    "appname": "Radix Mobile {{version}}",
     "appready": "App-a prest",
->>>>>>> v3.1.0
     "cacheexpirationtime": "Cache-aren iraungitze denbora (milisegundotan)",
     "cordovadevicemodel": "Cordova Device eredua",
     "cordovadeviceosversion": "Cordova Device SE bertsioa",

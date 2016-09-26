@@ -36,7 +36,7 @@ angular.module('mm.core')
 .provider('$mmApp', function($stateProvider) {
 
     /** Define the app storage schema. */
-    var DBNAME = 'SparkMobile',
+    var DBNAME = 'RadixMobile',
         dbschema = {
             stores: []
         },

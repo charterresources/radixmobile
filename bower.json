@@ -1,5 +1,5 @@
 {
-  "name": "sparkmobile2",
+  "name": "radixmobile",
   "private": "true",
   "devDependencies": {
     "ionic": "driftyco/ionic-bower#v1.1.1",

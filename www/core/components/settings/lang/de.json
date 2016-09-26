@@ -1,12 +1,7 @@
 {
-<<<<<<< HEAD
-    "about": "Über Spark Mobile",
-    "appname": "Spark Mobile {{version}}",
-=======
-    "about": "Über Moodle Mobile",
-    "appname": "Moodle Mobile {{version}}",
+    "about": "Über Radix Mobile",
+    "appname": "Radix Mobile {{version}}",
     "appready": "Mit der App nutzbar",
->>>>>>> v3.1.0
     "cacheexpirationtime": "Speicherdauer im Cache (Millisekunden)",
     "cordovadevicemodel": "Cordova Device Model",
     "cordovadeviceosversion": "Cordova Device OS Version",

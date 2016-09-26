@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<widget id="com.spark.sparkmobile" version="3.1.2" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-  <name>Spark Mobile</name>
-  <description>Official Spark Mobile app</description>
+<widget id="com.radix.radixmobile" version="3.1.2" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+  <name>Radix Mobile</name>
+  <description>Official Radix Mobile app</description>
   <author href="http://charterresources.us" email="info@charterresources.us">CESR</author>
   <content src="index.html"/>
   <access origin="*"/>

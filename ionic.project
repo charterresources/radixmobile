@@ -1,5 +1,5 @@
 {
-  "name": "sparkmobile2",
+  "name": "radixmobile",
   "app_id": "",
   "gulpStartupTasks": [
     "build",
