@@ -2,6 +2,8 @@
     "about": "Over",
     "appname": "Radix Mobile {{version}}",
     "cacheexpirationtime": "Cache verlooptijd (milliseconden)",
+    "cannotsyncoffline": "Kan offline geen bestanden synchroniseren.",
+    "cannotsyncwithoutwifi": "Kan nu niet synchroniseren omdat er volgens je huidige instellingen alleen over Wi-Fi gesynchroniseerd mag worden. Maak verbinding met een Wi-Fi-netwerk.",
     "cordovadevicemodel": "Cordova Device model",
     "cordovadeviceosversion": "Cordova Device OS versie",
     "cordovadeviceplatform": "Cordova Device platform",

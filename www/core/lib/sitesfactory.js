@@ -117,7 +117,8 @@ angular.module('mm.core')
 
     this.$get = function($http, $q, $mmWS, $mmDB, $log, md5, $mmApp, $mmLang, $mmUtil, $mmFS, mmCoreWSCacheStore,
             mmCoreWSPrefix, mmCoreSessionExpired, $mmEvents, mmCoreEventSessionExpired, mmCoreUserDeleted, mmCoreEventUserDeleted,
-            $mmText, $translate, mmCoreConfigConstants) {
+            $mmText, $translate, mmCoreConfigConstants, mmCoreUserPasswordChangeForced, mmCoreEventPasswordChangeForced,
+            mmCoreLoginTokenChangePassword) {
 
         $log = $log.getInstance('$mmSite');
 
@@ -252,6 +253,15 @@ angular.module('mm.core')
          */
         Site.prototype.setToken = function(token) {
             this.token = token;
+        };
+
+        /**
+         * Check if token is already expired using local data.
+         *
+         * @return {Boolean} is token is expired or not.
+         */
+        Site.prototype.isTokenExpired = function() {
+            return this.token == mmCoreLoginTokenChangePassword;
         };
 
         /**
@@ -405,6 +415,7 @@ angular.module('mm.core')
          *                    - getCacheUsingCacheKey (boolean) True if it should retrieve cached data by cacheKey,
          *                                        false if it should get the data based on the params passed (usual behavior).
          *                    - filter boolean (true) True to filter WS response (moodlewssettingfilter), false otherwise.
+         *                    - rewriteurls boolean (true) True to rewrite URLs (moodlewssettingfileurl), false otherwise.
          * @param {Boolean} retrying True if we're retrying the call for some reason. This is to prevent infinite loops.
          * @return {Promise}
          * @description
@@ -423,6 +434,13 @@ angular.module('mm.core')
             var site = this,
                 initialToken = site.token;
             data = data || {};
+
+            // Prevent calls with expired tokens.
+            if (site.isTokenExpired()) {
+                $log.debug('Token expired, rejecting.');
+                $mmEvents.trigger(mmCoreEventSessionExpired, site.id);
+                return $mmLang.translateAndReject('mm.login.reconnectdescription');
+            }
 
             // Get the method to use based on the available ones.
             method = site.getCompatibleFunction(method);
@@ -445,6 +463,7 @@ angular.module('mm.core')
 
             // Enable text filtering by default.
             data.moodlewssettingfilter = preSets.filter === false ? false : true;
+            data.moodlewssettingfileurl = preSets.rewriteurls === false ? false : true;
 
             return getFromCache(site, method, data, preSets).catch(function() {
                 // Do not pass those options to the core WS factory.
@@ -487,6 +506,10 @@ angular.module('mm.core')
                         // User deleted, trigger event.
                         $mmEvents.trigger(mmCoreEventUserDeleted, {siteid: site.id, params: data});
                         return $mmLang.translateAndReject('mm.core.userdeleted');
+                    } else if (error === mmCoreUserPasswordChangeForced) {
+                        // Password Change Forced, trigger event.
+                        $mmEvents.trigger(mmCoreEventPasswordChangeForced, site.id);
+                        return $q.reject();
                     } else if (typeof preSets.emergencyCache !== 'undefined' && !preSets.emergencyCache) {
                         $log.debug('WS call ' + method + ' failed. Emergency cache is forbidden, rejecting.');
                         return $q.reject(error);
@@ -871,9 +894,17 @@ angular.module('mm.core')
 
             if (preSets.getCacheUsingCacheKey) {
                 promise = db.whereEqual(mmCoreWSCacheStore, 'key', preSets.cacheKey).then(function(entries) {
-                    if (entries.length == 0) {
+                    if (!entries.length) {
                         // Cache key not found, get by params sent.
                         return db.get(mmCoreWSCacheStore, id);
+                    } else if (entries.length > 1) {
+                        // More than one entry found. Search the one with same ID as this call.
+                        for (var i = 0, len = entries.length; i < len; i++) {
+                            var entry = entries[i];
+                            if (entry.id == id) {
+                                return entry;
+                            }
+                        }
                     }
                     return entries[0];
                 });

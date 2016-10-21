@@ -82,7 +82,6 @@ angular.module('mm.core')
      *                            {String} [warning] Code of the warning message to show to the user.
      */
     self.checkSite = function(siteurl, protocol) {
-
         // formatURL adds the protocol if is missing.
         siteurl = $mmUtil.formatURL(siteurl);
 
@@ -91,39 +90,76 @@ angular.module('mm.core')
         } else if (!$mmApp.isOnline()) {
             return $mmLang.translateAndReject('mm.core.networkerrormsg');
         } else {
-
             protocol = protocol || "https://";
 
-            // Now, replace the siteurl with the protocol.
-            siteurl = siteurl.replace(/^http(s)?\:\/\//i, protocol);
-
-            return self.siteExists(siteurl).catch(function() {
-                // Site doesn't exist. Try to add or remove 'www'.
-                var treatedUrl = $mmText.addOrRemoveWWW(siteurl);
-                return self.siteExists(treatedUrl).then(function() {
-                    // Success, use this new URL as site url.
-                    siteurl = treatedUrl;
-                });
-            }).then(function() {
-                // Create a temporary site to check if local_mobile is installed.
-                var temporarySite = $mmSitesFactory.makeSite(undefined, siteurl);
-                return temporarySite.checkLocalMobilePlugin().then(function(data) {
-                    siteurl = temporarySite.getURL();
-                    services[siteurl] = data.service; // No need to store it in DB.
-                    return {siteurl: siteurl, code: data.code, warning: data.warning};
-                });
-            }, function() {
-                // Site doesn't exist.
-
-                if (siteurl.indexOf("https://") === 0) {
-                    // Retry without HTTPS.
-                    return self.checkSite(siteurl, "http://");
-                } else{
-                    return $mmLang.translateAndReject('mm.core.cannotconnect');
+            return checkSite(siteurl, protocol, false).catch(function(error) {
+                // Do not continue checking if WS are not enabled.
+                if (error.errorcode && error.errorcode == 'enablewsdescription') {
+                    return $q.reject(error.error);
                 }
+
+                // Retry with the other protocol.
+                var checkPromise = protocol == "https://" ? checkSite(siteurl, "http://", error) :
+                                                            checkSite(siteurl, "https://", error);
+
+                return checkPromise.catch(function(error){
+                    // Site doesn't exist.
+                    if (error.error) {
+                        return $q.reject(error.error);
+                    }
+                    return $mmLang.translateAndReject('mm.login.checksiteversion');
+                });
             });
         }
     };
+
+    /**
+     * Helper function to check if a site is valid and if it has specifics settings for authentication
+     * (like force to log in using the browser).
+     *
+     * @param {String} siteurl       URL of the site to check.
+     * @param {String} protocol      Protocol to use. If not defined, use https.
+     * @param {Object} previousError Previous error to get the most important error information among checks.
+     * @return {Promise}        A promise to be resolved when the site is checked. Resolve params:
+     *                            {Number} code      Code to identify the authentication method to use.
+     *                            {String} siteurl   Site url to use (might have changed during the process).
+     *                            {String} [warning] Code of the warning message to show to the user.
+     */
+    function checkSite(siteurl, protocol, previousError) {
+        // Now, replace the siteurl with the protocol.
+        siteurl = siteurl.replace(/^http(s)?\:\/\//i, protocol);
+
+        return self.siteExists(siteurl).catch(function(error) {
+            previousError = error.error ? error : previousError;
+            // Do not continue checking if WS are not enabled.
+            if (error.errorcode && error.errorcode == 'enablewsdescription') {
+                return $q.reject(previousError);
+            }
+
+            // Site doesn't exist. Try to add or remove 'www'.
+            var treatedUrl = $mmText.addOrRemoveWWW(siteurl);
+            return self.siteExists(treatedUrl).then(function() {
+                // Success, use this new URL as site url.
+                siteurl = treatedUrl;
+            }).catch(function(error) {
+                // Do not continue checking if WS are not enabled.
+                if (error.errorcode && error.errorcode == 'enablewsdescription') {
+                    return $q.reject(error);
+                }
+
+                previousError = error.error ? error : previousError;
+                return $q.reject(previousError);
+            });
+        }).then(function() {
+            // Create a temporary site to check if local_mobile is installed.
+            var temporarySite = $mmSitesFactory.makeSite(undefined, siteurl);
+            return temporarySite.checkLocalMobilePlugin().then(function(data) {
+                siteurl = temporarySite.getURL();
+                services[siteurl] = data.service; // No need to store it in DB.
+                return {siteurl: siteurl, code: data.code, warning: data.warning};
+            });
+        });
+    }
 
     /**
      * Check if a site exists.
@@ -135,12 +171,23 @@ angular.module('mm.core')
      * @return {Promise}        A promise to be resolved if the site exists.
      */
     self.siteExists = function(siteurl) {
-        var url = siteurl + '/login/token.php';
-        if (!ionic.Platform.isWebView()) {
-            // We pass fake parameters to make CORS work (without params, the script stops before allowing CORS).
-            url = url + '?username=a&password=b&service=c';
-        }
-        return $http.get(url, {timeout: 30000});
+        var data = {
+            username: 'a',
+            password: 'b',
+            service: determineService(siteurl)
+        };
+
+        return $http.post(siteurl + '/login/token.php', data, {timeout: 30000, responseType: 'json'}).then(function(data) {
+            data = data.data;
+
+            if (data.errorcode && (data.errorcode == 'enablewsdescription' || data.errorcode == 'requirecorrectaccess')) {
+                return $q.reject({errorcode: data.errorcode, error: data.error});
+            } else if (data.error && data.error == 'Web services must be enabled in Advanced features.') {
+                return $q.reject({errorcode: 'enablewsdescription', error: data.error});
+            }
+            // Other errors are not being checked because invalid login will be always raised and we cannot differ them.
+            return $q.when();
+        });
     };
 
     /**
@@ -189,6 +236,8 @@ angular.module('mm.core')
                         if (!retry && data.errorcode == "requirecorrectaccess") {
                             siteurl = $mmText.addOrRemoveWWW(siteurl);
                             return self.getUserToken(siteurl, username, password, service, true);
+                        } else if (typeof data.errorcode != 'undefined') {
+                            return $q.reject({error: data.error, errorcode: data.errorcode});
                         } else {
                             return $q.reject(data.error);
                         }
@@ -361,23 +410,29 @@ angular.module('mm.core')
      * @module mm.core
      * @ngdoc method
      * @name $mmSitesManager#loadSite
-     * @param {String} siteid ID of the site to load.
+     * @param {String} siteId ID of the site to load.
      * @return {Promise}      Promise to be resolved when the site is loaded.
      */
-    self.loadSite = function(siteid) {
-        $log.debug('Load site '+siteid);
+    self.loadSite = function(siteId) {
+        $log.debug('Load site ' + siteId);
 
-        return self.getSite(siteid).then(function(site) {
+        return self.getSite(siteId).then(function(site) {
             currentSite = site;
-            self.login(siteid);
+            self.login(siteId);
+
+            if (site.isTokenExpired()) {
+                $log.debug('Token expired, rejecting.');
+                $mmEvents.trigger(mmCoreEventSessionExpired, siteId);
+                return $mmLang.translateAndReject('mm.login.reconnectdescription');
+            }
 
             // Check if local_mobile was installed to Moodle.
             return site.checkIfLocalMobileInstalledAndNotUsed().then(function() {
                 // Local mobile was added. Throw invalid session to force reconnect and create a new token.
-                $mmEvents.trigger(mmCoreEventSessionExpired, siteid);
+                $mmEvents.trigger(mmCoreEventSessionExpired, siteId);
             }, function() {
                 // Update site info. We don't block the UI.
-                self.updateSiteInfo(siteid).finally(function() {
+                self.updateSiteInfo(siteId).finally(function() {
                     var infos = site.getInfo(),
                         validation = validateSiteInfo(infos);
                     if (validation !== true) {
@@ -474,13 +529,12 @@ angular.module('mm.core')
      * @module mm.core
      * @ngdoc method
      * @name $mmSitesManager#getSite
-     * @param  {Number} siteId The site ID.
+     * @param  {Number} [siteId] The site ID. If not defined, current site (if available).
      * @return {Promise}
      */
     self.getSite = function(siteId) {
         if (!siteId) {
-            // Site ID not valid, reject.
-            return $q.reject();
+            return currentSite ? $q.when(currentSite) : $q.reject();
         } else if (currentSite && currentSite.getId() === siteId) {
             return $q.when(currentSite);
         } else if (typeof sites[siteId] != 'undefined') {
@@ -500,7 +554,7 @@ angular.module('mm.core')
      * @module mm.core
      * @ngdoc method
      * @name $mmSitesManager#getSiteDb
-     * @param  {Number} siteId The site ID.
+     * @param  {Number} [siteId] The site ID. If not defined, current site (if available).
      * @return {Promise}
      */
     self.getSiteDb = function(siteId) {
@@ -581,9 +635,15 @@ angular.module('mm.core')
      * @return {Promise} Promise to be resolved when the user is logged out.
      */
     self.logout = function() {
+        if (!currentSite) {
+            // Already logged out.
+            return $q.when();
+        }
+        var siteId = currentSite.getId();
+
         currentSite = undefined;
         return $mmApp.getDB().remove(mmCoreCurrentSiteStore, 1).finally(function() {
-            $mmEvents.trigger(mmCoreEventLogout);
+            $mmEvents.trigger(mmCoreEventLogout, siteId);
         });
     };
 
@@ -616,18 +676,32 @@ angular.module('mm.core')
      * @module mm.core
      * @ngdoc method
      * @name $mmSitesManager#updateSiteToken
-     * @param {String} siteurl  Site's URL.
+     * @param {String} siteUrl  Site's URL.
      * @param {String} username Username.
      * @param {String} token    User's new token.
      * @return {Promise}        A promise to be resolved when the site is updated.
      */
-    self.updateSiteToken = function(siteurl, username, token) {
-        var siteid = self.createSiteID(siteurl, username);
-        return self.getSite(siteid).then(function(site) {
+    self.updateSiteToken = function(siteUrl, username, token) {
+        var siteId = self.createSiteID(siteUrl, username);
+        return self.updateSiteTokenBySiteId(siteId, token);
+    };
+
+    /**
+     * Updates a site's token usign siteId.
+     *
+     * @module mm.core
+     * @ngdoc method
+     * @name $mmSitesManager#updateSiteTokenBySiteId
+     * @param {String} siteId   Site Id.
+     * @param {String} token    User's new token.
+     * @return {Promise}        A promise to be resolved when the site is updated.
+     */
+    self.updateSiteTokenBySiteId = function(siteId, token) {
+        return self.getSite(siteId).then(function(site) {
             site.token = token;
 
             return $mmApp.getDB().insert(mmCoreSitesStore, {
-                id: siteid,
+                id: siteId,
                 siteurl: site.getURL(),
                 token: token,
                 infos: site.getInfo()
