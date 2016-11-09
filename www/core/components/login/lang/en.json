@@ -1,7 +1,7 @@
 {
     "authenticating": "Authenticating",
     "cancel": "Cancel",
-    "checksiteversion": "Check that your site uses Moodle 2.4 or later.",
+    "checksiteversion": "Check that your site uses Radix 2.4 or later.",
     "credentials": "Credentials",
     "credentialsdescription": "Please provide your username and password to login on",
     "confirmdeletesite": "Are you sure you want to delete the site {{sitename}}?",
@@ -22,7 +22,7 @@
     "loginbutton": "Login!",
     "logininsiterequired": "You need to log in to the site in a browser window.",
     "mobileservicesnotenabled": "Mobile Services are not enabled in your site. Please, contact your site administrator if you think mobile access should be enabled.",
-    "newsitedescription": "Please enter the URL of your site. Note that it might not be configured to work with this app. You only enter the site once.",
+    "newsitedescription": "Please enter the URL of your site. Once logged in, you may add more users by repeating this process via 'Change/Add site or user' menu.",
     "notloggedin": "You need to be logged in.",
     "password": "Password",
     "passwordrequired": "Password required",
@@ -34,8 +34,8 @@
     "siteaddress": "Site address",
     "siteinmaintenance": "Your site is in maintenance mode",
     "siteurl": "Site URL",
-    "siteurlrequired": "Site URL required, i.e <i>http://www.yourmoodlesite.abc or https://www.yourmoodlesite.efg</i>",
+    "siteurlrequired": "Site URL required, i.e <i>http://www.yoursite.abc or https://www.yoursite.efg</i>",
     "username": "Username",
     "usernamerequired": "Username required",
-    "webservicesnotenabled": "Web Services are not enabled in your site. Please, contact your Moodle site administrator if you think mobile access should be enabled."
+    "webservicesnotenabled": "Web Services are not enabled in your site. Please, contact your site administrator if you think mobile access should be enabled."
 }

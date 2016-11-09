@@ -1,6 +1,6 @@
 {
     "app_id" : "com.radix.radixmobile",
-    "appname": "Moodle Mobile",
+    "appname": "Radix Mobile",
     "versioncode" : "2015",
     "versionname" : "3.1.3",
     "cache_expiration_time" : 300000,
