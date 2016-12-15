@@ -38,6 +38,7 @@ angular.module('mm.addons.messages')
         canDelete = $mmaMessages.canDeleteMessages(), // Check if user can delete messages.
         syncObserver;
 
+    $scope.showKeyboard = $stateParams.showKeyboard;
     $scope.loaded = false;
     $scope.messages = [];
     $scope.userId = userId;
@@ -94,6 +95,7 @@ angular.module('mm.addons.messages')
             sending: true,
             useridfrom: $scope.currentUserId,
             smallmessage: text,
+            text: text,
             timecreated: new Date().getTime()
         };
         $scope.messages.push(message);
@@ -264,8 +266,8 @@ angular.module('mm.addons.messages')
     function notifyNewMessage() {
         var last = $scope.messages[$scope.messages.length - 1],
             trigger = false;
-        if ((last && (last.smallmessage !== lastMessage.message || last.timecreated !== lastMessage.timecreated))) {
-            lastMessage = {message: last.smallmessage, timecreated: last.timecreated};
+        if ((last && (last.text !== lastMessage.message || last.timecreated !== lastMessage.timecreated))) {
+            lastMessage = {message: last.text, timecreated: last.timecreated};
             trigger = true;
         } else if (!last) {
             lastMessage = {message: "", timecreated: 0};

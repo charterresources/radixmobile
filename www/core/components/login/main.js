@@ -63,7 +63,8 @@ angular.module('mm.core.login', [])
         params: {
             siteurl: '',
             username: '',
-            urltoopen: '' // For content links.
+            urltoopen: '', // For content links.
+            siteconfig: null
         },
         onEnter: function($state, $stateParams) {
             // Do not allow access to this page when the URL was not passed.
@@ -84,6 +85,16 @@ angular.module('mm.core.login', [])
             infositeurl: '',
             siteid: ''
         }
+    })
+
+    .state('mm_login.email_signup', {
+        url: '/email_signup',
+        templateUrl: 'core/components/login/templates/emailsignup.html',
+        controller: 'mmLoginEmailSignupCtrl',
+        cache: false,
+        params: {
+            siteurl: ''
+        }
     });
 
     // Default redirect to the login page.
@@ -97,37 +108,64 @@ angular.module('mm.core.login', [])
 })
 
 .run(function($log, $state, $mmUtil, $translate, $mmSitesManager, $rootScope, $mmSite, $mmURLDelegate, $ionicHistory, $timeout,
-                $mmEvents, $mmLoginHelper, mmCoreEventSessionExpired, $mmApp, $ionicPlatform, mmCoreConfigConstants,
-                mmCoreEventPasswordChangeForced, mmCoreLoginTokenChangePassword) {
+                $mmEvents, $mmLoginHelper, mmCoreEventSessionExpired, $mmApp, $ionicPlatform, mmCoreConfigConstants, $mmText,
+                mmCoreEventPasswordChangeForced, mmCoreEventUserNotFullySetup) {
 
     $log = $log.getInstance('mmLogin');
 
     var isSSOConfirmShown = false,
-        isChangePasswordConfirmShown = false,
-        waitingForBrowser = false;
+        isOpenEditAlertShown = false,
+        waitingForBrowser = false,
+        lastInAppUrl;
 
     // Listen for sessionExpired event to reconnect the user.
     $mmEvents.on(mmCoreEventSessionExpired, sessionExpired);
 
-    // Listen for sessionExpired event to reconnect the user.
-    $mmEvents.on(mmCoreEventPasswordChangeForced, passwordChangeForced);
+    // Listen for passwordchange and usernotfullysetup events to open InAppBrowser.
+    $mmEvents.on(mmCoreEventPasswordChangeForced, function(siteId) {
+        openInAppForEdit(siteId, '/login/change_password.php', 'mm.core.forcepasswordchangenotice');
+    });
+    $mmEvents.on(mmCoreEventUserNotFullySetup, function(siteId) {
+        openInAppForEdit(siteId, '/user/edit.php', 'mm.core.usernotfullysetup');
+    });
 
     // Register observer to check if the app was launched via URL scheme.
     $mmURLDelegate.register('mmLoginSSO', appLaunchedByURL);
 
     // Observe loaded pages in the InAppBrowser to handle SSO URLs.
     $rootScope.$on('$cordovaInAppBrowser:loadstart', function(e, event) {
-        // URLs with a custom scheme are prefixed with "http://", we need to remove this.
-        var url = event.url.replace(/^http:\/\//, '');
+        // URLs with a custom scheme can be prefixed with "http://" or "https://", we need to remove this.
+        var protocol = $mmText.getUrlProtocol(event.url),
+            url = event.url.replace(/^https?:\/\//, '');
+
         if (appLaunchedByURL(url)) {
             // Close the browser if it's a valid SSO URL.
             $mmUtil.closeInAppBrowser();
+        } else if (ionic.Platform.isAndroid()) {
+            // Check if the URL has a custom URL scheme. In Android they need to be opened manually.
+            var urlScheme = $mmText.getUrlProtocol(url);
+            if (urlScheme) {
+                // Open in browser should launch the right app if found and do nothing if not found.
+                $mmUtil.openInBrowser(url);
+
+                // At this point the InAppBrowser is showing a "Webpage not available" error message.
+                // Try to navigate to last loaded URL so this error message isn't found.
+                if (lastInAppUrl) {
+                    $mmUtil.openInApp(lastInAppUrl);
+                } else {
+                    // No last URL loaded, close the InAppBrowser.
+                    $mmUtil.closeInAppBrowser();
+                }
+            } else {
+                lastInAppUrl = protocol + '://' + url;
+            }
         }
     });
 
     // Observe InAppBrowser closed and resume events to stop waiting for browser SSO.
     $rootScope.$on('$cordovaInAppBrowser:exit', function() {
         waitingForBrowser = false;
+        lastInAppUrl = false;
     });
     $ionicPlatform.on('resume', function() {
         // Wait a second before setting it to false since in iOS there could be some frozen WS calls.
@@ -177,7 +215,6 @@ angular.module('mm.core.login', [])
     function sessionExpired(siteid) {
 
         var siteurl = $mmSite.getURL();
-
         if (typeof(siteurl) === 'undefined') {
             return;
         }
@@ -200,7 +237,8 @@ angular.module('mm.core.login', [])
                     isSSOConfirmShown = true;
                     $mmUtil.showConfirm($translate('mm.login.reconnectssodescription')).then(function() {
                         waitingForBrowser = true;
-                        $mmLoginHelper.openBrowserForSSOLogin(result.siteurl, result.code);
+                        $mmLoginHelper.confirmAndOpenBrowserForSSOLogin(
+                                    result.siteurl, result.code, result.service, result.config && result.config.launchurl);
                     }).finally(function() {
                         isSSOConfirmShown = false;
                     });
@@ -220,44 +258,32 @@ angular.module('mm.core.login', [])
         });
     }
 
-    // Function to handle password change forced events.
-    function passwordChangeForced(siteId) {
-        if (!siteId) {
+    // Function to open in app browser to change password or complete user profile.
+    function openInAppForEdit(siteId, path, alertMessage) {
+        if (!siteId || siteId !== $mmSite.getId()) {
+            // Site that triggered the event is not current site, nothing to do.
             return;
         }
 
-        $mmSitesManager.getSite(siteId).then(function(site) {
-            var siteUrl = site.getURL();
-            if (typeof(siteUrl) === 'undefined') {
-                return;
-            }
+        var siteUrl = $mmSite.getURL();
+        if (!siteUrl) {
+            return;
+        }
 
-            // Expire user token for the site.
-            $log.debug('Expiring token for site ' + siteId);
-            $mmSitesManager.updateSiteTokenBySiteId(siteId, mmCoreLoginTokenChangePassword);
+        if (!isOpenEditAlertShown && !waitingForBrowser) {
+            isOpenEditAlertShown = true;
 
-            // Site that triggered the event is not current site.
-            if (siteId !== $mmSite.getId()) {
-                return;
-            }
+            // User password change forced, invalidate all site caches.
+            $mmSite.invalidateWsCache();
 
-            if (!isChangePasswordConfirmShown && !waitingForBrowser) {
-                isChangePasswordConfirmShown = true;
-
-                // User password change forced, invalidate all site caches.
-                site.invalidateWsCache();
-
-                $mmEvents.trigger(mmCoreEventSessionExpired, siteId);
-
-                // Session expired, trigger event.
-                $mmLoginHelper.openChangePassword(siteUrl, $translate.instant('mm.core.nopasswordchangeforced')).then(function() {
-                    waitingForBrowser = true;
-                }).finally(function() {
-                    isChangePasswordConfirmShown = false;
-                });
-            }
-        });
-
+            // Open change password.
+            alertMessage = $translate.instant(alertMessage) + '<br>' + $translate.instant('mm.core.redirectingtosite');
+            return $mmSite.openInAppWithAutoLogin(siteUrl + path, undefined, alertMessage).then(function() {
+                waitingForBrowser = true;
+            }).finally(function() {
+                isOpenEditAlertShown = false;
+            });
+        }
     }
 
     // Function to handle URL received by Custom URL Scheme. If it's a SSO login, perform authentication.
@@ -292,7 +318,7 @@ angular.module('mm.core.login', [])
         $mmApp.ready().then(function() {
             return $mmLoginHelper.validateBrowserSSOLogin(url);
         }).then(function(siteData) {
-            return $mmLoginHelper.handleSSOLoginAuthentication(siteData.siteurl, siteData.token);
+            return $mmLoginHelper.handleSSOLoginAuthentication(siteData.siteurl, siteData.token, siteData.privateToken);
         }).then(function() {
             $mmLoginHelper.goToSiteInitialPage();
         }).catch(function(errorMessage) {

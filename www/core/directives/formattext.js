@@ -209,6 +209,11 @@ angular.module('mm.core')
                 elWidth = el.offsetWidth || el.width || el.clientWidth,
                 dom = angular.element('<div>').html(formatted); // Convert the content into DOM.
 
+            if (!elWidth) {
+                // Cannot calculate element's width, use a medium number to avoid false adapt image icons appearing.
+                elWidth = 100;
+            }
+
             // Walk through the content to find the links and add our directive to it.
             // Important: We need to look for links first because in 'img' we add new links without mm-link.
             angular.forEach(dom.find('a'), function(anchor) {
@@ -242,6 +247,7 @@ angular.module('mm.core')
                 treatMedia(el, component, componentId, siteId);
             });
             angular.forEach(dom.find('video'), function(el) {
+                treatVideoFilters(el);
                 treatMedia(el, component, componentId, siteId);
                 // Set data-tap-disabled="true" to make controls work in Android (see MOBILE-1452).
                 el.setAttribute('data-tap-disabled', true);
@@ -286,6 +292,45 @@ angular.module('mm.core')
         }
     }
 
+    // Convenience function to extract YouTube Id to translate to embedded video.
+    // Based on http://stackoverflow.com/questions/3452546/javascript-regex-how-to-get-youtube-video-id-from-url
+    function youtubeGetId(url) {
+        var regExp = /^.*(?:(?:youtu.be\/)|(?:v\/)|(?:\/u\/\w\/)|(?:embed\/)|(?:watch\?))\??v?=?([^#\&\?]*).*/;
+        var match = url.match(regExp);
+        return (match && match[1].length == 11)? match[1] : false;
+    }
+
+    /**
+     * Treat video filters. Currently only treating youtube video using video JS.
+     *
+     * @param  {Object} el           DOM element.
+     */
+    function treatVideoFilters(el) {
+        // Treat Video JS Youtube video links and translate them to iframes.
+        if (!angular.element(el).hasClass('video-js')) {
+            return;
+        }
+
+        var data = JSON.parse(el.getAttribute('data-setup') || '{}'),
+            youtubeId = data.techOrder && data.techOrder[0] && data.techOrder[0] == 'youtube' && data.sources && data.sources[0] &&
+                data.sources[0].src && youtubeGetId(data.sources[0].src);
+
+        if (!youtubeId) {
+            return;
+        }
+
+        var iframe = document.createElement('iframe');
+        iframe.id = el.id;
+        iframe.src = 'https://www.youtube.com/embed/' + youtubeId;
+        iframe.setAttribute('frameborder', 0);
+        iframe.width = '100%';
+        iframe.height = 300;
+
+        // Replace video tag by the iframe.
+        el.parentNode.insertBefore(iframe, el);
+        el.parentNode.removeChild(el);
+    }
+
     /**
      * Add media adapt class and mm-external-content to the media element and their child sources.
      *
@@ -302,6 +347,9 @@ angular.module('mm.core')
             source.setAttribute('target-src', source.getAttribute('src'));
             source.removeAttribute('src');
             addExternalContent(source, component, componentId, siteId);
+        });
+        angular.forEach(angular.element(el).find('track'), function(track) {
+            addExternalContent(track, component, componentId, siteId);
         });
     }
 

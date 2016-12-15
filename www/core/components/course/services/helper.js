@@ -22,7 +22,7 @@ angular.module('mm.core.course')
  * @name $mmCourseHelper
  */
 .factory('$mmCourseHelper', function($q, $mmCoursePrefetchDelegate, $mmFilepool, $mmUtil, $mmCourse, $mmSite, $state,
-            mmCoreNotDownloaded, mmCoreOutdated, mmCoreDownloading, mmCoreCourseAllSectionsId, $mmText, $translate) {
+            mmCoreNotDownloaded, mmCoreOutdated, mmCoreDownloading, mmCoreCourseAllSectionsId, $mmText, $mmSitesManager) {
 
     var self = {},
         calculateSectionStatus = false;
@@ -376,7 +376,10 @@ angular.module('mm.core.course')
             }
 
             return promise.then(function() {
-                if (courseId == 1) {
+                // Get the site home ID.
+                return $mmSitesManager.getSiteHomeId(siteId);
+            }).then(function(siteHomeId) {
+                if (courseId == siteHomeId) {
                     // It's front page we go directly to course section.
                     return $state.go('redirect', {
                         siteid: siteId,
@@ -576,6 +579,20 @@ angular.module('mm.core.course')
                 section.count++;
             }
         });
+    };
+
+    /**
+     * Check if a section has content.
+     * Used mostly when a section is going to be rendered.
+     *
+     * @module mm.core.course
+     * @ngdoc method
+     * @name $mmCourseHelper#sectionHasContent
+     * @param {Object} section Section to check.
+     * @return {Boolean}       True if the section has content.
+     */
+    self.sectionHasContent = function(section) {
+        return !section.hiddenbynumsections  && (section.summary != '' || section.modules.length);
     };
 
     return self;

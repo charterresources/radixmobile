@@ -9,7 +9,7 @@
                     <label>Scroll down to see the course average</label>
                     <thead>
                         <tr>
-                            <th ng-repeat="column in gradesTable.columns track by $index" id="{{column.id}}" class="header" ng-class="{'hidden-phone': !column.showAlways}"" colspan="{{column.width}}">
+                            <th ng-repeat="column in gradesTable.columns track by $index" id="{{column.id}}" class="header" ng-class="{'hidden-phone': !column.showAlways}"" colspan="{{column.width}}" ng-hide="!column.showAlways && forcePhoneView">
                                 {{column.name | translate}}
                             </th>
                         </tr>
