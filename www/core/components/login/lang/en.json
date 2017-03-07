@@ -68,7 +68,7 @@
     "supplyinfo": "More details",
     "username": "Username",
     "usernamerequired": "Username required",
-    "webservicesnotenabled": "Web Services are not enabled in your site. Please, contact your site administrator if you think mobile access should be enabled."
+    "webservicesnotenabled": "Web Services are not enabled in your site. Please, contact your site administrator if you think mobile access should be enabled.",
     "usernotaddederror": "User not added - error",
-    "visitchangepassword": "Do you want to visit the site to change the password?",
+    "visitchangepassword": "Do you want to visit the site to change the password?"
 }
