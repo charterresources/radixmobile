@@ -72,11 +72,14 @@ angular.module('mm.core.user')
      * @return {String}         Formatted address.
      */
     self.formatAddress = function(address, city, country) {
-        if (address) {
-            address += city ? ', ' + city : '';
-            address += country ? ', ' + country : '';
-        }
-        return address;
+        var separator = $translate.instant('mm.core.listsep'),
+            values = [address, city, country];
+
+        values = values.filter(function (value) {
+            return value && value.length > 0;
+        });
+
+        return values.join(separator + " ");
     };
 
     /**
@@ -86,34 +89,26 @@ angular.module('mm.core.user')
      * @ngdoc method
      * @name $mmUser#formatRoleList
      * @param  {Array} roles List of user roles.
-     * @return {Promise}     Promise resolved with the formatted roles (string).
+     * @return {String}      The formatted roles.
      */
     self.formatRoleList = function(roles) {
-        var deferred = $q.defer();
-
-        if (roles && roles.length > 0) {
-            $translate('mm.core.elementseparator').then(function(separator) {
-                var rolekeys = roles.map(function(el) {
-                    return 'mm.user.'+el.shortname; // Set the string key to be translated.
-                });
-
-                $translate(rolekeys).then(function(roleNames) {
-                    var roles = '';
-                    for (var roleKey in roleNames) {
-                        var roleName = roleNames[roleKey];
-                        if (roleName.indexOf('mm.user.') > -1) {
-                            // Role name couldn't be translated, leave it like it was.
-                            roleName = roleName.replace('mm.user.', '');
-                        }
-                        roles += (roles != '' ? separator + " ": '') + roleName;
-                    }
-                    deferred.resolve(roles);
-                });
-            });
-        } else {
-            deferred.resolve('');
+        if (!roles || roles.length <= 0) {
+            return "";
         }
-        return deferred.promise;
+
+        var separator = $translate.instant('mm.core.listsep');
+
+        roles = roles.reduce(function (previousValue, currentValue) {
+            var role = $translate.instant('mm.user.' + currentValue.shortname);
+
+            if (role.indexOf('mm.user.') < 0) {
+                // Only add translated role names.
+                previousValue.push(role);
+            }
+            return previousValue;
+        }, []);
+
+        return roles.join(separator + " ");
     };
 
     /**
@@ -246,6 +241,35 @@ angular.module('mm.core.user')
      */
     self.invalidateUserCache = function(userid) {
         return $mmSite.invalidateWsCacheForKey(getUserCacheKey(userid));
+    };
+
+    /**
+     * Check if update profile picture is disabled in a certain site.
+     *
+     * @module mm.core.user
+     * @ngdoc method
+     * @name $mmUser#isUpdatePictureDisabled
+     * @param  {String} [siteId] Site Id. If not defined, use current site.
+     * @return {Promise}         Promise resolved with true if disabled, rejected or resolved with false otherwise.
+     */
+    self.isUpdatePictureDisabled = function(siteId) {
+        return $mmSitesManager.getSite(siteId).then(function(site) {
+            return self.isUpdatePictureDisabledInSite(site);
+        });
+    };
+
+    /**
+     * Check if update profile picture is disabled in a certain site.
+     *
+     * @module mm.core.user
+     * @ngdoc method
+     * @name $mmUser#isUpdatePictureDisabledInSite
+     * @param  {Object} [site] Site. If not defined, use current site.
+     * @return {Boolean}       True if disabled, false otherwise.
+     */
+    self.isUpdatePictureDisabledInSite = function(site) {
+        site = site || $mmSite;
+        return site.isFeatureDisabled('$mmUserDelegate_picture');
     };
 
     /**

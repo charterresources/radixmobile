@@ -23,7 +23,7 @@ angular.module('mm.addons.competency')
  * @ngdoc service
  * @name $mmaCompetencyHandlers
  */
-.factory('$mmaCompetencyHandlers', function($log, $mmaCompetency, mmCoursesAccessMethods) {
+.factory('$mmaCompetencyHandlers', function($log, $mmaCompetency, mmCoursesAccessMethods, mmUserProfileHandlersTypeNewPage) {
     $log = $log.getInstance('$mmaCompetencyHandlers');
 
     var self = {},
@@ -100,7 +100,7 @@ angular.module('mm.addons.competency')
              */
             return function($scope) {
                 $scope.icon = 'ion-map';
-                $scope.title = 'mma.competency.mylearningplans';
+                $scope.title = 'mma.competency.myplans';
                 $scope.state = 'site.learningplans';
                 $scope.class = 'mma-competency-handler';
             };
@@ -201,7 +201,9 @@ angular.module('mm.addons.competency')
      */
     self.learningPlan = function() {
 
-        var self = {};
+        var self = {
+            type: mmUserProfileHandlersTypeNewPage
+        };
 
         /**
          * Check if handler is enabled.

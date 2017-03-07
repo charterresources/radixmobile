@@ -23,7 +23,8 @@ angular.module('mm.addons.badges')
  * @ngdoc service
  * @name $mmaBadgesHandlers
  */
-.factory('$mmaBadgesHandlers', function($mmaBadges, $mmSite, $q, mmCoursesAccessMethods) {
+.factory('$mmaBadgesHandlers', function($mmaBadges, $mmContentLinksHelper, mmUserProfileHandlersTypeNewPage,
+            $mmContentLinkHandlerFactory) {
 
     var self = {};
 
@@ -36,7 +37,9 @@ angular.module('mm.addons.badges')
      */
     self.userProfile = function() {
 
-        var self = {};
+        var self = {
+            type: mmUserProfileHandlersTypeNewPage
+        };
 
         /**
          * Check if handler is enabled.
@@ -96,6 +99,49 @@ angular.module('mm.addons.badges')
         };
 
         return self;
+    };
+
+    /**
+     * Content links handler for My Badges.
+     *
+     * @module mm.addons.badges
+     * @ngdoc method
+     * @name $mmaBadgesHandlers#myBadgesLinksHandler
+     */
+    self.myBadgesLinksHandler = $mmContentLinkHandlerFactory.createChild('/badges/mybadges.php', '$mmUserDelegate_mmaBadges');
+    // Check if the handler is enabled for a certain site. See $mmContentLinkHandlerFactory#isEnabled.
+    self.myBadgesLinksHandler.isEnabled = $mmaBadges.isPluginEnabled;
+    // Get actions to perform with the link. See $mmContentLinkHandlerFactory#getActions.
+    self.myBadgesLinksHandler.getActions = function(siteIds, url, params, courseId) {
+        return [{
+            action: function(siteId) {
+                var stateParams = {
+                    courseid: 0
+                };
+                $mmContentLinksHelper.goInSite('site.userbadges', stateParams, siteId);
+            }
+        }];
+    };
+
+    /**
+     * Content links handler for viewing a badge.
+     *
+     * @module mm.addons.badges
+     * @ngdoc method
+     * @name $mmaBadgesHandlers#badgeLinksHandler
+     */
+    self.badgeLinksHandler = $mmContentLinkHandlerFactory.createChild(/\/badges\/badge\.php.*([\?\&]hash=)/);
+    self.badgeLinksHandler.isEnabled = $mmaBadges.isPluginEnabled;
+    self.badgeLinksHandler.getActions = function(siteIds, url, params) {
+        return [{
+            action: function(siteId) {
+                var stateParams = {
+                    cid: 0,
+                    uniquehash: params.hash
+                };
+                $mmContentLinksHelper.goInSite('site.issuedbadge', stateParams, siteId);
+            }
+        }];
     };
 
     return self;

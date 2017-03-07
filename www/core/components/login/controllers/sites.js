@@ -21,13 +21,42 @@ angular.module('mm.core.login')
  * @ngdoc controller
  * @name mmLoginSitesCtrl
  */
-.controller('mmLoginSitesCtrl', function($scope, $state, $mmSitesManager, $log, $translate, $mmUtil, $ionicHistory, $mmText,
-            $mmLoginHelper) {
+.controller('mmLoginSitesCtrl', function($scope, $mmSitesManager, $log, $translate, $mmUtil, $ionicHistory, $mmText, $mmLoginHelper,
+            $mmAddonManager) {
 
     $log = $log.getInstance('mmLoginSitesCtrl');
+    var $mmaPushNotifications = $mmAddonManager.get('$mmaPushNotifications');
 
     $mmSitesManager.getSites().then(function(sites) {
-        $scope.sites = sites;
+        // Remove protocol from the url to show more url text.
+        sites = sites.map(function(site) {
+            site.siteurl = site.siteurl.replace(/^https?:\/\//, '');
+            site.badge = 0;
+            if ($mmaPushNotifications) {
+                $mmaPushNotifications.getSiteCounter(site.id).then(function(number) {
+                    site.badge = number;
+                });
+            }
+            return site;
+        });
+
+        // Sort sites by url and fullname.
+        $scope.sites = sites.sort(function(a, b) {
+            // First compare by site url without the protocol.
+            var compareA = a.siteurl.toLowerCase(),
+                compareB = b.siteurl.toLowerCase(),
+                compare = compareA.localeCompare(compareB);
+
+            if (compare !== 0) {
+                return compare;
+            }
+
+            // If site url is the same, use fullname instead.
+            compareA = a.fullname.toLowerCase().trim();
+            compareB = b.fullname.toLowerCase().trim();
+            return compareA.localeCompare(compareB);
+        });
+
         $scope.data = {
             hasSites: sites.length > 0,
             showDelete: false
@@ -47,7 +76,7 @@ angular.module('mm.core.login')
             sitename = site.sitename;
 
         $mmText.formatText(sitename).then(function(sitename) {
-            $mmUtil.showConfirm($translate('mm.login.confirmdeletesite', {sitename: sitename})).then(function() {
+            $mmUtil.showConfirm($translate.instant('mm.login.confirmdeletesite', {sitename: sitename})).then(function() {
                 $mmSitesManager.deleteSite(site.id).then(function() {
                     $scope.sites.splice(index, 1);
                     $scope.data.showDelete = false;
@@ -68,8 +97,10 @@ angular.module('mm.core.login')
         var modal = $mmUtil.showModalLoading();
 
         $mmSitesManager.loadSite(siteId).then(function() {
-            $ionicHistory.nextViewOptions({disableBack: true});
-            return $mmLoginHelper.goToSiteInitialPage();
+            if (!$mmLoginHelper.isSiteLoggedOut()) {
+                $ionicHistory.nextViewOptions({disableBack: true});
+                return $mmLoginHelper.goToSiteInitialPage();
+            }
         }, function(error) {
             $log.error('Error loading site ' + siteId);
             error = error || 'Error loading site.';
