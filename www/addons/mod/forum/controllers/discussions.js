@@ -23,7 +23,7 @@ angular.module('mm.addons.mod_forum')
  */
 .controller('mmaModForumDiscussionsCtrl', function($q, $scope, $stateParams, $mmaModForum, $mmCourse, $mmUtil, $mmGroups, $mmUser,
             $mmEvents, $ionicScrollDelegate, $ionicPlatform, mmUserProfileState, mmaModForumNewDiscussionEvent, $mmSite, $translate,
-            mmaModForumReplyDiscussionEvent, $mmText, mmaModForumComponent, $mmaModForumOffline, $mmaModForumSync, $mmEvents,
+            mmaModForumReplyDiscussionEvent, $mmText, mmaModForumComponent, $mmaModForumOffline, $mmaModForumSync, $mmCourseHelper,
             mmaModForumAutomSyncedEvent, mmaModForumManualSyncedEvent, $mmApp, mmCoreEventOnlineStatusChanged) {
     var module = $stateParams.module || {},
         courseid = $stateParams.courseid,
@@ -56,6 +56,11 @@ angular.module('mm.addons.mod_forum')
             $scope.description = forum.intro || $scope.description;
             $scope.forum = forum;
 
+            // In tablet, load first discussion skipping "Add new discussion" button.
+            if (!$scope.linkToLoad) {
+                $scope.linkToLoad = $scope.isCreateEnabled && forum.cancreatediscussions ? 2 : 1;
+            }
+
             if (sync) {
                 // Try to synchronize the forum.
                 return syncForum(showErrors).catch(function() {
@@ -63,45 +68,51 @@ angular.module('mm.addons.mod_forum')
                 });
             }
         }).then(function() {
-            return $mmGroups.getActivityGroupMode(forum.cmid).then(function(mode) {
-                usesGroups = mode === $mmGroups.SEPARATEGROUPS || mode === $mmGroups.VISIBLEGROUPS;
-            }).finally(function() {
-                var promises = [];
+            // Check if the activity uses groups.
+            if ($mmGroups.canGetActivityGroupMode()) {
+                return $mmGroups.getActivityGroupMode(forum.cmid).then(function(mode) {
+                    usesGroups = mode === $mmGroups.SEPARATEGROUPS || mode === $mmGroups.VISIBLEGROUPS;
+                });
+            }
+        }).then(function() {
+            var promises = [];
 
-                // Check if there are discussions stored in offline.
-                promises.push($mmaModForumOffline.hasNewDiscussions(forum.id).then(function(hasOffline) {
-                    $scope.hasOffline = hasOffline;
+            // Get offline discussions if any.
+            promises.push($mmaModForumOffline.getNewDiscussions(forum.id).then(function(offlineDiscussions) {
+                $scope.hasOffline = !!offlineDiscussions.length;
 
-                    if (hasOffline) {
-                        // Get offline discussions.
-                        return $mmaModForumOffline.getNewDiscussions(forum.id).then(function(offlineDiscussions) {
-                            var promise = usesGroups ?
-                                $mmaModForum.formatDiscussionsGroups(forum.cmid, offlineDiscussions) : $q.when(offlineDiscussions);
+                if ($scope.hasOffline) {
+                    var promise = usesGroups ?
+                        $mmaModForum.formatDiscussionsGroups(forum.cmid, offlineDiscussions) : $q.when(offlineDiscussions);
 
-                            return promise.then(function(offlineDiscussions) {
-                                // Fill user data for Offline discussions (should be already cached).
-                                var userPromises = [];
-                                angular.forEach(offlineDiscussions, function(discussion) {
-                                    userPromises.push($mmUser.getProfile(discussion.userid, courseid, true).then(function(user) {
-                                        discussion.userfullname = user.fullname;
-                                        discussion.userpictureurl = user.profileimageurl;
-                                    }));
-                                });
-
-                                return $q.all(userPromises).then(function() {
-                                    $scope.offlineDiscussions = offlineDiscussions;
-                                });
-                            });
+                    return promise.then(function(offlineDiscussions) {
+                        // Fill user data for Offline discussions (should be already cached).
+                        var userPromises = [];
+                        angular.forEach(offlineDiscussions, function(discussion) {
+                            if (discussion.parent != 0 || forum.type != 'single') {
+                                // Do not show author for first post and type single.
+                                userPromises.push($mmUser.getProfile(discussion.userid, courseid, true).then(function(user) {
+                                    discussion.userfullname = user.fullname;
+                                    discussion.userpictureurl = user.profileimageurl;
+                                }));
+                            }
                         });
-                    } else {
-                        $scope.offlineDiscussions = [];
-                    }
-                }));
 
-                promises.push(fetchDiscussions(refresh));
+                        return $q.all(userPromises).then(function() {
+                            $scope.offlineDiscussions = offlineDiscussions;
+                        });
+                    });
+                } else {
+                    $scope.offlineDiscussions = [];
+                }
+            }));
 
-                return $q.all(promises);
-            });
+            promises.push(fetchDiscussions(refresh));
+
+            return $q.all(promises);
+        }).then(function() {
+            // All data obtained, now fill the context menu.
+            $mmCourseHelper.fillContextMenu($scope, module, courseid, refresh, mmaModForumComponent);
         }).catch(function(message) {
             if (!refresh) {
                 // Get forum failed, retry without using cache since it might be a new activity.
@@ -128,6 +139,17 @@ angular.module('mm.addons.mod_forum')
             var promise = usesGroups ?
                     $mmaModForum.formatDiscussionsGroups(forum.cmid, response.discussions) : $q.when(response.discussions);
             return promise.then(function(discussions) {
+
+                if (forum.type == 'single') {
+                    // Hide author for first post and type single.
+                    for (var x in discussions) {
+                        if (discussions[x].userfullname && discussions[x].parent == 0) {
+                            discussions[x].userfullname = false;
+                            break;
+                        }
+                    }
+                }
+
                 if (page == 0) {
                     $scope.discussions = discussions;
                 } else {
@@ -284,6 +306,16 @@ angular.module('mm.addons.mod_forum')
         });
     }
 
+    // Confirm and Remove action.
+    $scope.removeFiles = function() {
+        $mmCourseHelper.confirmAndRemove(module, courseid);
+    };
+
+    // Context Menu Prefetch action.
+    $scope.prefetch = function() {
+        $mmCourseHelper.contextMenuPrefetch($scope, module, courseid);
+    };
+
     // Context Menu Description action.
     $scope.expandDescription = function() {
         $mmText.expandText($translate.instant('mm.core.description'), $scope.description, false, mmaModForumComponent, module.id);
@@ -305,7 +337,7 @@ angular.module('mm.addons.mod_forum')
 
     // Refresh data if this forum discussion is synchronized from discussions list.
     syncManualObserver = $mmEvents.on(mmaModForumManualSyncedEvent, function(data) {
-        if (data && data.siteid == $mmSite.getId() && data.forumid == forum.id && data.userid == $mmSite.getUserId()) {
+        if (forum && data && data.siteid == $mmSite.getId() && data.forumid == forum.id && data.userid == $mmSite.getUserId()) {
             // Refresh the data.
             $scope.discussionsLoaded = false;
             return showSpinnerAndFetch(false);
@@ -328,6 +360,7 @@ angular.module('mm.addons.mod_forum')
         obsNewDisc && obsNewDisc.off && obsNewDisc.off();
         obsReply && obsReply.off && obsReply.off();
         syncObserver && syncObserver.off && syncObserver.off();
+        syncManualObserver && syncManualObserver.off && syncManualObserver.off();
         onlineObserver && onlineObserver.off && onlineObserver.off();
     });
 });

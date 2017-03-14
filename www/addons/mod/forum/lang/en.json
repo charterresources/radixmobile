@@ -5,6 +5,7 @@
     "cannotcreatediscussion": "Could not create new discussion",
     "couldnotadd": "Could not add your post due to an unknown error",
     "discussion": "Discussion",
+    "discussionlocked": "This discussion has been locked so you can no longer reply to it.",
     "discussionsubscription": "Discussion subscription",
     "edit": "Edit",
     "erroremptymessage": "Post message cannot be empty",
@@ -14,6 +15,9 @@
     "forumnodiscussionsyet": "There are no discussion topics yet in this forum.",
     "group": "Group",
     "message": "Message",
+    "modeflatnewestfirst": "Display replies flat, with newest first",
+    "modeflatoldestfirst": "Display replies flat, with oldest first",
+    "modenested": "Display replies in nested form",
     "numdiscussions": "{{numdiscussions}} discussions",
     "numreplies": "{{numreplies}} replies",
     "posttoforum": "Post to forum",
@@ -21,7 +25,7 @@
     "refreshdiscussions": "Refresh discussions",
     "refreshposts": "Refresh discussion posts",
     "reply": "Reply",
-    "sortnewestfirst": "Display newest first",
-    "sortoldestfirst": "Display oldest first",
-    "subject": "Subject"
+    "subject": "Subject",
+    "unread": "Unread",
+    "unreadpostsnumber": "{{$a}} unread posts"
 }

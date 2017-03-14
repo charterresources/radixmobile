@@ -23,7 +23,7 @@ angular.module('mm.addons.mod_book')
  */
 .factory('$mmaModBookHandlers', function($mmCourse, $mmaModBook, $mmEvents, $state, $mmSite, $mmCourseHelper,
             $mmCoursePrefetchDelegate, mmCoreDownloading, mmCoreNotDownloaded, mmCoreOutdated, mmCoreDownloaded, $mmUtil,
-            mmCoreEventPackageStatusChanged, mmaModBookComponent, $mmContentLinksHelper, $q, $mmaModBookPrefetchHandler) {
+            mmCoreEventPackageStatusChanged, mmaModBookComponent, $mmContentLinksHelper, $mmaModBookPrefetchHandler) {
 
     var self = {};
 
@@ -131,8 +131,11 @@ angular.module('mm.addons.mod_book')
                     if (status) {
                         $scope.spinner = status === mmCoreDownloading;
                         downloadBtn.hidden = status !== mmCoreNotDownloaded;
-                        // Always show refresh button if a book is downloaded because revision and timemodified aren't reliable.
-                        refreshBtn.hidden = status !== mmCoreOutdated && status !== mmCoreDownloaded;
+                        refreshBtn.hidden = status !== mmCoreOutdated;
+                        if (!$mmCoursePrefetchDelegate.canCheckUpdates()) {
+                            // Always show refresh button if downloaded because revision and timemodified aren't reliable.
+                            refreshBtn.hidden = refreshBtn.hidden && status !== mmCoreDownloaded;
+                        }
                     }
                 }
 
@@ -162,58 +165,7 @@ angular.module('mm.addons.mod_book')
      * @ngdoc method
      * @name $mmaModBookHandlers#linksHandler
      */
-    self.linksHandler = function() {
-
-        var self = {};
-
-        /**
-         * Whether or not the handler is enabled for a certain site.
-         *
-         * @param  {String} siteId     Site ID.
-         * @param  {Number} [courseId] Course ID related to the URL.
-         * @return {Promise}           Promise resolved with true if enabled.
-         */
-        function isEnabled(siteId, courseId) {
-            return $mmaModBook.isPluginEnabled(siteId).then(function(enabled) {
-                if (!enabled) {
-                    return false;
-                }
-                return courseId || $mmCourse.canGetModuleWithoutCourseId(siteId);
-            });
-        }
-
-        /**
-         * Get actions to perform with the link.
-         *
-         * @param {String[]} siteIds  Site IDs the URL belongs to.
-         * @param {String} url        URL to treat.
-         * @param {Number} [courseId] Course ID related to the URL.
-         * @return {Promise}          Promise resolved with the list of actions.
-         *                            See {@link $mmContentLinksDelegate#registerLinkHandler}.
-         */
-        self.getActions = function(siteIds, url, courseId) {
-            // Check it's a book URL.
-            if (typeof self.handles(url) != 'undefined') {
-                return $mmContentLinksHelper.treatModuleIndexUrl(siteIds, url, isEnabled, courseId);
-            }
-            return $q.when([]);
-        };
-
-        /**
-         * Check if the URL is handled by this handler. If so, returns the URL of the site.
-         *
-         * @param  {String} url URL to check.
-         * @return {String}     Site URL. Undefined if the URL doesn't belong to this handler.
-         */
-        self.handles = function(url) {
-            var position = url.indexOf('/mod/book/view.php');
-            if (position > -1) {
-                return url.substr(0, position);
-            }
-        };
-
-        return self;
-    };
+    self.linksHandler = $mmContentLinksHelper.createModuleIndexLinkHandler('mmaModBook', 'book', $mmaModBook);
 
     return self;
 });

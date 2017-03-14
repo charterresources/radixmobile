@@ -22,9 +22,13 @@ angular.module('mm.addons.mod_glossary')
  * @name $mmaModGlossaryPrefetchHandler
  */
 .factory('$mmaModGlossaryPrefetchHandler', function($mmaModGlossary, mmaModGlossaryComponent, $mmFilepool, $q, $mmUser,
-            mmCoreDownloaded, mmCoreOutdated, $mmUtil, $mmPrefetchFactory) {
+            mmCoreDownloaded, mmCoreOutdated, $mmUtil, $mmPrefetchFactory, $mmCoursePrefetchDelegate,
+            mmaModGlossaryShowAllCategories) {
 
     var self = $mmPrefetchFactory.createPrefetchHandler(mmaModGlossaryComponent, false);
+
+    // RegExp to check if a module has updates based on the result of $mmCoursePrefetchDelegate#getCourseUpdates.
+    self.updatesNames = /^configuration$|^.*files$|^entries$/;
 
     /**
      * Determine the status of a module based on the current status detected.
@@ -32,13 +36,14 @@ angular.module('mm.addons.mod_glossary')
      * @module mm.addons.mod_glossary
      * @ngdoc method
      * @name $mmaModGlossaryPrefetchHandler#determineStatus
-     * @param {String} status Current status.
-     * @return {String}       Status to show.
+     * @param {String} status     Current status.
+     * @param  {Boolean} canCheck True if updates can be checked using core_course_check_updates.
+     * @return {String}           Status to show.
      */
-    self.determineStatus = function(status) {
-        if (status === mmCoreDownloaded) {
-            // Glossary are always marked as outdated because we can't tell if there's something new without
-            // having to call all the WebServices. This will be improved in the future.
+    self.determineStatus = function(status, canCheck) {
+        if (!canCheck && status === mmCoreDownloaded) {
+            // Glossary are always marked as outdated if updates cannot be checked because we can't tell if there's something
+            // new without having to call all the WebServices.
             return mmCoreOutdated;
         } else {
             return status;
@@ -157,6 +162,11 @@ angular.module('mm.addons.mod_glossary')
      * @return {Promise}         Promise resolved when done.
      */
     self.invalidateModule = function(module, courseId) {
+        if ($mmCoursePrefetchDelegate.canCheckUpdates()) {
+            // No need to invalidate anything if can check updates.
+            return $q.when();
+        }
+
         return $mmaModGlossary.getGlossary(courseId, module.id).then(function(glossary) {
             var promises = [];
 
@@ -206,32 +216,36 @@ angular.module('mm.addons.mod_glossary')
     function prefetchGlossary(module, courseId, single, siteId) {
         var revision,
             timemod;
+        siteId = siteId || $mmSite.getId();
 
         // Prefetch the glossary data.
-        return $mmaModGlossary.getGlossary(courseId, module.id).then(function(glossary) {
+        return $mmaModGlossary.getGlossary(courseId, module.id, siteId).then(function(glossary) {
             var promises = [];
 
             angular.forEach(glossary.browsemodes, function(mode) {
                 switch(mode) {
                     case 'letter': // Always done. Look bellow.
+                        break;
                     case 'cat': // Not implemented.
+                        promises.push($mmaModGlossary.fetchAllEntries($mmaModGlossary.getEntriesByCategory,
+                            [glossary.id, mmaModGlossaryShowAllCategories], false, undefined, undefined, siteId));
                         break;
                     case 'date':
                         promises.push($mmaModGlossary.fetchAllEntries($mmaModGlossary.getEntriesByDate,
-                            [glossary.id, 'CREATION', 'DESC']));
+                            [glossary.id, 'CREATION', 'DESC'], false, undefined, undefined, siteId));
                         promises.push($mmaModGlossary.fetchAllEntries($mmaModGlossary.getEntriesByDate,
-                            [glossary.id, 'UPDATE', 'DESC']));
+                            [glossary.id, 'UPDATE', 'DESC'], false, undefined, undefined, siteId));
                         break;
                     case 'author':
                         promises.push($mmaModGlossary.fetchAllEntries($mmaModGlossary.getEntriesByAuthor,
-                            [glossary.id, 'ALL', 'LASTNAME', 'ASC']));
+                            [glossary.id, 'ALL', 'LASTNAME', 'ASC'], false, undefined, undefined, siteId));
                         break;
                 }
             });
 
             // Fetch all entries to get information from.
-            promises.push($mmaModGlossary.fetchAllEntries($mmaModGlossary.getEntriesByLetter, [glossary.id, 'ALL'])
-                    .then(function(entries) {
+            promises.push($mmaModGlossary.fetchAllEntries($mmaModGlossary.getEntriesByLetter, [glossary.id, 'ALL'], false,
+                    undefined, undefined, siteId).then(function(entries) {
                 var promises = [],
                     files = getFilesFromGlossaryAndEntries(module, glossary, entries),
                     userIds = [];
@@ -239,7 +253,7 @@ angular.module('mm.addons.mod_glossary')
                 // Fetch user avatars.
                 angular.forEach(entries, function(entry) {
                     // Fetch individual entries.
-                    promises.push($mmaModGlossary.getEntry(entry.id));
+                    promises.push($mmaModGlossary.getEntry(entry.id, siteId));
 
                     userIds.push(entry.userid);
                 });

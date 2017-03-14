@@ -23,6 +23,7 @@ angular.module('mm.core')
  * @description
  * This provider is the interface with the app database. The modules that need to store
  * information here need to register their stores.
+ * Remote addons cannot register stores in the app database.
  *
  * Example:
  *
@@ -33,7 +34,7 @@ angular.module('mm.core')
  *      });
  *  })
  */
-.provider('$mmApp', function($stateProvider) {
+.provider('$mmApp', function($stateProvider, $sceDelegateProvider) {
 
     /** Define the app storage schema. */
     var DBNAME = 'RadixMobile',
@@ -63,6 +64,7 @@ angular.module('mm.core')
 
     /**
      * Register multiple stores at once.
+     * Remote addons cannot register stores in the app database.
      *
      * @param  {Array} stores Array of store objects.
      * @return {Void}
@@ -115,6 +117,9 @@ angular.module('mm.core')
         /**
          * Closes the keyboard if plugin is available.
          *
+         * @module mm.core
+         * @ngdoc method
+         * @name $mmApp#closeKeyboard
          * @return {Boolean} True if plugin is available, false otherwise.
          */
         self.closeKeyboard = function() {
@@ -127,6 +132,10 @@ angular.module('mm.core')
 
         /**
          * Get the application global database.
+         *
+         * @module mm.core
+         * @ngdoc method
+         * @name $mmApp#getDB
          * @return {Object} App's DB.
          */
         self.getDB = function() {
@@ -142,6 +151,9 @@ angular.module('mm.core')
          *
          * Do not use this method to modify the schema. Use $mmAppProvider#registerStore instead.
          *
+         * @module mm.core
+         * @ngdoc method
+         * @name $mmApp#getSchema
          * @return {Object} The schema.
          */
         self.getSchema = function() {
@@ -181,6 +193,21 @@ angular.module('mm.core')
          */
         self.isDevice = function() {
             return !!window.device;
+        };
+
+        /**
+         * Check if the keyboard is visible.
+         *
+         * @module mm.core
+         * @ngdoc method
+         * @name $mmApp#isKeyboardVisible
+         * @return {Boolean} True if keyboard is visible, false otherwise.
+         */
+        self.isKeyboardVisible = function() {
+            if (typeof cordova != 'undefined' && cordova.plugins && cordova.plugins.Keyboard) {
+                return cordova.plugins.Keyboard.isVisible;
+            }
+            return false;
         };
 
         /**
@@ -242,6 +269,9 @@ angular.module('mm.core')
         /**
          * Open the keyboard if plugin is available.
          *
+         * @module mm.core
+         * @ngdoc method
+         * @name $mmApp#openKeyboard
          * @return {Boolean} True if plugin is available, false otherwise.
          */
         self.openKeyboard = function() {
@@ -337,6 +367,77 @@ angular.module('mm.core')
                 return ssoAuthenticationDeferred.promise;
             }
             return $q.when();
+        };
+
+        /**
+         * Retrieve redirect data.
+         *
+         * @module mm.core
+         * @ngdoc method
+         * @name $mmApp#getRedirect
+         * @return {Object} Object with siteid, state, params and timemodified.
+         */
+        self.getRedirect = function() {
+            if (localStorage && localStorage.getItem) {
+                try {
+                    var data = {
+                        siteid: localStorage.getItem('mmCoreRedirectSiteId'),
+                        state: localStorage.getItem('mmCoreRedirectState'),
+                        params: localStorage.getItem('mmCoreRedirectParams'),
+                        timemodified: localStorage.getItem('mmCoreRedirectTime')
+                    };
+
+                    if (data.params) {
+                        data.params = JSON.parse(data.params);
+                    }
+
+                    return data;
+                } catch(ex) {
+                    $log.error('Error loading redirect data:', ex);
+                }
+            }
+
+            return {};
+        };
+
+        /**
+         * Store redirect params.
+         *
+         * @module mm.core
+         * @ngdoc method
+         * @name $mmApp#storeRedirect
+         * @param  {String} siteId Site ID.
+         * @param  {String} state  State to go.
+         * @param  {Object} params State params.
+         * @return {Void}
+         */
+        self.storeRedirect = function(siteId, state, params) {
+            if (localStorage && localStorage.setItem) {
+                try {
+                    localStorage.setItem('mmCoreRedirectSiteId', siteId);
+                    localStorage.setItem('mmCoreRedirectState', state);
+                    localStorage.setItem('mmCoreRedirectParams', JSON.stringify(params));
+                    localStorage.setItem('mmCoreRedirectTime', new Date().getTime());
+                } catch(ex) {}
+            }
+        };
+
+        /**
+         * Trust a wildcard of resources. Reserved for core use.
+         *
+         * @module mm.core
+         * @ngdoc method
+         * @name $mmApp#trustResources
+         * @param  {String} wildcard Wildcard to trust.
+         * @return {Void}
+         * @protected
+         */
+        self.trustResources = function(wildcard) {
+            var currentList = $sceDelegateProvider.resourceUrlWhitelist();
+            if (currentList.indexOf(wildcard) == -1) {
+                currentList.push(wildcard);
+                $sceDelegateProvider.resourceUrlWhitelist(currentList);
+            }
         };
 
         return self;

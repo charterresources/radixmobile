@@ -23,9 +23,9 @@ angular.module('mm.addons.mod_quiz')
  */
 .controller('mmaModQuizIndexCtrl', function($scope, $stateParams, $mmaModQuiz, $mmCourse, $ionicPlatform, $q, $translate,
             $mmaModQuizHelper, $ionicHistory, $ionicScrollDelegate, $mmEvents, mmaModQuizEventAttemptFinished, $state,
-            $mmQuestionBehaviourDelegate, $mmaModQuizSync, $mmText, $mmUtil, mmaModQuizEventAutomSynced, $mmSite,
+            $mmQuestionBehaviourDelegate, $mmaModQuizSync, $mmText, $mmUtil, $mmCourseHelper, mmaModQuizEventAutomSynced, $mmSite,
             $mmCoursePrefetchDelegate, mmCoreDownloaded, mmCoreDownloading, mmCoreEventPackageStatusChanged,
-            mmaModQuizComponent, $mmaModQuizPrefetchHandler, $mmApp, $mmEvents, mmCoreEventOnlineStatusChanged) {
+            mmaModQuizComponent, $mmaModQuizPrefetchHandler, $mmApp, mmCoreEventOnlineStatusChanged) {
     var module = $stateParams.module || {},
         courseId = $stateParams.courseid,
         quiz,
@@ -115,6 +115,9 @@ angular.module('mm.addons.mod_quiz')
 
         }).then(function() {
             $scope.quiz = quiz;
+
+            // All data obtained, now fill the context menu.
+            $mmCourseHelper.fillContextMenu($scope, module, courseId, refresh, mmaModQuizComponent);
         }).catch(function(message) {
             if (!refresh && !quiz) {
                 // Get quiz failed, retry without using cache since it might be a new activity.
@@ -191,7 +194,10 @@ angular.module('mm.addons.mod_quiz')
 
             // Get gradebook grade.
             return $mmaModQuiz.getGradeFromGradebook(courseId, module.id).then(function(data) {
-                gradebookData = data;
+                gradebookData = {
+                    grade: data.gradeformatted,
+                    feedback: data.feedback
+                };
             }).catch(function() {
                 // Fallback to quiz best grade if failure or not found.
                 gradebookData = {
@@ -460,6 +466,16 @@ angular.module('mm.addons.mod_quiz')
         }
     };
 
+    // Confirm and Remove action.
+    $scope.removeFiles = function() {
+        $mmCourseHelper.confirmAndRemove(module, courseId);
+    };
+
+    // Context Menu Prefetch action.
+    $scope.prefetch = function() {
+        $mmCourseHelper.contextMenuPrefetch($scope, module, courseId);
+    };
+    
     // Context Menu Description action.
     $scope.expandDescription = function() {
         $mmText.expandText($translate.instant('mm.core.description'), $scope.description, false, mmaModQuizComponent, module.id);

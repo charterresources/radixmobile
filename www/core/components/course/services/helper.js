@@ -21,8 +21,9 @@ angular.module('mm.core.course')
  * @ngdoc service
  * @name $mmCourseHelper
  */
-.factory('$mmCourseHelper', function($q, $mmCoursePrefetchDelegate, $mmFilepool, $mmUtil, $mmCourse, $mmSite, $state,
-            mmCoreNotDownloaded, mmCoreOutdated, mmCoreDownloading, mmCoreCourseAllSectionsId, $mmText, $translate) {
+.factory('$mmCourseHelper', function($q, $mmCoursePrefetchDelegate, $mmFilepool, $mmUtil, $mmCourse, $mmSite, $state, $mmText,
+            mmCoreNotDownloaded, mmCoreOutdated, mmCoreDownloading, mmCoreCourseAllSectionsId, $mmSitesManager, $mmAddonManager,
+            $controller, $mmCourseDelegate, $translate, $mmEvents, mmCoreEventPackageStatusChanged) {
 
     var self = {},
         calculateSectionStatus = false;
@@ -339,6 +340,51 @@ angular.module('mm.core.course')
     };
 
     /**
+     * This function treats every module on the sections provided to get the controller a content handler provides, treat completion
+     * and navigates to a module page if required. It also returns if sections has content.
+     *
+     * @param {Array}   sections            Sections to treat modules.
+     * @param {Number}  courseId            Course ID of the modules.
+     * @param {Number}  moduleId            Module to navigate to if needed.
+     * @param {Array}   completionStatus    If it needs to treat completion the status of each module.
+     * @param {Object}  scope               Scope of the view.
+     * @return {Boolean}                    If sections has content.
+     */
+    self.addContentHandlerControllerForSectionModules = function(sections, courseId, moduleId, completionStatus, scope) {
+        var hasContent = false;
+
+        angular.forEach(sections, function(section) {
+            if (!section || !self.sectionHasContent(section)) {
+                return;
+            }
+
+            hasContent = true;
+
+            angular.forEach(section.modules, function(module) {
+                module._controller =
+                        $mmCourseDelegate.getContentHandlerControllerFor(module.modname, module, courseId, section.id);
+
+                if (completionStatus && typeof completionStatus[module.id] != 'undefined') {
+                    // Check if activity has completions and if it's marked.
+                    module.completionstatus = completionStatus[module.id];
+                }
+
+                if (module.id == moduleId) {
+                    // This is the module we're looking for. Open it.
+                    var newScope = scope.$new();
+                    $controller(module._controller, {$scope: newScope});
+                    if (newScope.action) {
+                        newScope.action();
+                    }
+                    newScope.$destroy();
+                }
+            });
+        });
+
+        return hasContent;
+    }
+
+    /**
      * Retrieves the courseId of the module and navigates to it.
      *
      * @module mm.core.course
@@ -376,16 +422,23 @@ angular.module('mm.core.course')
             }
 
             return promise.then(function() {
-                if (courseId == 1) {
-                    // It's front page we go directly to course section.
-                    return $state.go('redirect', {
-                        siteid: siteId,
-                        state: 'site.mm_course-section',
-                        params: {
-                            cid: courseId,
-                            mid: moduleId
-                        }
-                    });
+                // Get the site.
+                return $mmSitesManager.getSite(siteId);
+            }).then(function(site) {
+                if (courseId == site.getSiteHomeId()) {
+                    var $mmaFrontpage = $mmAddonManager.get('$mmaFrontpage');
+                    if ($mmaFrontpage && !$mmaFrontpage.isDisabledInSite(site)) {
+                        return $mmaFrontpage.isFrontpageAvailable().then(function() {
+                            // Frontpage is avalaible so redirect to it.
+                            return $state.go('redirect', {
+                                siteid: siteId,
+                                state: 'site.frontpage',
+                                params: {
+                                    moduleid: moduleId
+                                }
+                            });
+                        });
+                    }
                 } else {
                     return $state.go('redirect', {
                         siteid: siteId,
@@ -399,11 +452,7 @@ angular.module('mm.core.course')
                 }
             });
         }).catch(function(error) {
-            if (error) {
-                $mmUtil.showErrorModal(error);
-            } else {
-                $mmUtil.showErrorModal('mm.course.errorgetmodule', true);
-            }
+            $mmUtil.showErrorModalDefault(error, 'mm.course.errorgetmodule', true);
             return $q.reject();
         }).finally(function() {
             modal.dismiss();
@@ -574,6 +623,115 @@ angular.module('mm.core.course')
                 // It's one of the modules we were expecting to download.
                 section.dwnModuleIds.splice(index, 1);
                 section.count++;
+            }
+        });
+    };
+
+    /**
+     * Check if a section has content.
+     * Used mostly when a section is going to be rendered.
+     *
+     * @module mm.core.course
+     * @ngdoc method
+     * @name $mmCourseHelper#sectionHasContent
+     * @param {Object} section Section to check.
+     * @return {Boolean}       True if the section has content.
+     */
+    self.sectionHasContent = function(section) {
+        return !section.hiddenbynumsections  && (section.summary != '' || section.modules.length);
+    };
+
+    /**
+     * Show confirmation dialog and then remove a module files.
+     *
+     * @module mm.core.course
+     * @ngdoc method
+     * @name $mmCourseHelper#confirmAndRemove
+     * @param {Object} module    Module to remove the files.
+     * @param {Number} courseId  Course ID the module belongs to.
+     * @return {Promise}         Promise resolved when done.
+     */
+    self.confirmAndRemove = function(module, courseId) {
+        return $mmUtil.showConfirm($translate('mm.course.confirmdeletemodulefiles')).then(function() {
+            return $mmCoursePrefetchDelegate.removeModuleFiles(module, courseId);
+        });
+    };
+
+    /**
+     * Helper function to prefetch a module, showing a confirmation modal if the size is big. Meant to be called
+     * from a context menu option.
+     *
+     * @module mm.core.course
+     * @ngdoc method
+     * @name $mmCourseHelper#contextMenuPrefetch
+     * @param {Object} scope    Scope
+     * @param {Object} module   Module to be prefetched
+     * @param {Number} courseId Course ID the module belongs to.
+     * @return {Promise}        Promise resolved when done.
+     */
+    self.contextMenuPrefetch = function(scope, module, courseId) {
+        var icon = scope.prefetchStatusIcon;
+
+        scope.prefetchStatusIcon = 'spinner'; // Show spinner since this operation might take a while.
+        // We need to call getDownloadSize, the package might have been updated.
+        return $mmCoursePrefetchDelegate.getModuleDownloadSize(module, courseId).then(function(size) {
+            return $mmUtil.confirmDownloadSize(size).then(function() {
+                return $mmCoursePrefetchDelegate.prefetchModule(module, courseId).catch(function() {
+                    return failPrefetch(!scope.$$destroyed);
+                });
+            }, function() {
+                // User hasn't confirmed, stop spinner.
+                scope.prefetchStatusIcon = icon;
+                return failPrefetch(false);
+            });
+        }, function(error) {
+            return failPrefetch(true, error);
+        });
+
+        // Function to call if an error happens.
+        function failPrefetch(showError, error) {
+            scope.prefetchStatusIcon = icon;
+            if (showError) {
+                $mmUtil.showErrorModalDefault(error, 'mm.core.errordownloading', true);
+            }
+            return $q.reject();
+        }
+    };
+
+    /**
+     * Fill the Context Menu when particular Module is loaded.
+     *
+     * @module mm.core.course
+     * @ngdoc method
+     * @name $mmCourseHelper#fillContextMenu
+     * @param  {Object} scope                   Scope.
+     * @param  {Object} module                  Module.
+     * @param  {Number} courseId                Course ID the module belongs to.
+     * @param  {Number} [invalidateCache=false] Invalidates the cache first.
+     * @param  {String} [component]             Component of the module.
+     * @return {Promise}                        Promise resolved when done.
+     */
+    self.fillContextMenu = function(scope, module, courseId, invalidateCache, component) {
+        return self.getModulePrefetchInfo(module, courseId, invalidateCache).then(function(moduleInfo) {
+            scope.size = moduleInfo.size > 0 ? moduleInfo.sizeReadable : 0;
+            scope.prefetchStatusIcon = moduleInfo.statusIcon;
+            if (moduleInfo.timemodified > 0) {
+                scope.timemodified = $translate.instant('mm.core.lastmodified') + ': ' + moduleInfo.timemodifiedReadable;
+            } else {
+                // Cannot calculate time modified, show a default text.
+                scope.timemodified = $translate.instant('mm.core.download');
+            }
+
+            if (typeof scope.statusObserver == 'undefined' && component) {
+                scope.statusObserver = $mmEvents.on(mmCoreEventPackageStatusChanged, function(data) {
+                    if (data.siteid === $mmSite.getId() && data.componentId === module.id && data.component === component) {
+                        self.fillContextMenu(scope, module, courseId, false, component);
+                    }
+                });
+
+                scope.$on('$destroy', function() {
+                    scope.statusObserver && scope.statusObserver.off && scope.statusObserver.off();
+                });
             }
         });
     };

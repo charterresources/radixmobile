@@ -22,19 +22,19 @@ angular.module('mm.addons.mod_assign')
  * @name mmaModAssignEditCtrl
  */
 .controller('mmaModAssignEditCtrl', function($scope, $stateParams, $mmaModAssign, $mmUtil, $translate, mmaModAssignComponent, $q,
-        $mmSite, $mmaModAssignHelper, $rootScope, $ionicPlatform, $timeout, $mmEvents, $ionicHistory, $mmaModAssignOffline,
-        mmaModAssignSubmissionSavedEvent, mmaModAssignSubmittedForGradingEvent, $mmFileUploaderHelper, $mmaModAssignSync,
-        $mmSyncBlock) {
+        $mmSite, $mmaModAssignHelper, $timeout, $mmEvents, $mmaModAssignOffline, $mmFileUploaderHelper, $mmaModAssignSync,
+        mmaModAssignSubmissionSavedEvent, mmaModAssignSubmittedForGradingEvent, $mmSyncBlock) {
 
     var courseId = $stateParams.courseid,
         userId = $mmSite.getUserId(), // Right now we can only edit current user's submissions.
         isBlind = !!$stateParams.blindid,
         editStr = $translate.instant('mma.mod_assign.editsubmission'),
-        originalBackFunction = $rootScope.$ionicGoBack,
-        unregisterHardwareBack,
-        currentView = $ionicHistory.currentView(),
         saveOffline = false,
-        hasOffline = false;
+        hasOffline = false,
+        blockData;
+
+    // Block leaving the view, we want to show a confirm to the user if there's unsaved data.
+    blockData = $mmUtil.blockLeaveView($scope, leaveView);
 
     $scope.title = editStr; // Temporary title.
     $scope.assignComponent = mmaModAssignComponent;
@@ -65,13 +65,13 @@ angular.module('mm.addons.mod_assign')
                 // Cannot connect. Get cached data.
                 return $mmaModAssign.getSubmissionStatus(assign.id, userId, isBlind).then(function(response) {
                     var userSubmission = $mmaModAssign.getSubmissionObjectFromAttempt(assign, response.lastattempt);
-                    if (userSubmission && (userSubmission.status == 'new' || userSubmission.status == 'reopened')) {
-                        // It's a new submission, allow creating it in offline.
+                    if ($mmaModAssignHelper.canEditSubmissionOffline(assign, userSubmission)) {
                         return response;
-                    } else {
-                        // User is editing a submission, we don't allow it in offline for now so reject.
-                        return $q.reject(error);
                     }
+
+                    // Submission cannot be edited in offline, reject.
+                    $scope.allowOffline = false;
+                    return $q.reject(error);
                 });
             }).then(function(response) {
                 if (!response.lastattempt.canedit) {
@@ -80,7 +80,7 @@ angular.module('mm.addons.mod_assign')
                 }
 
                 $scope.userSubmission = $mmaModAssign.getSubmissionObjectFromAttempt(assign, response.lastattempt);
-                $scope.allowOffline = $scope.userSubmission.status == 'new';
+                $scope.allowOffline = true; // If offline isn't allowed we shouldn't have reached this point.
 
                 // Only show submission statement if we are editing our own submission.
                 if (assign.requiresubmissionstatement && !assign.submissiondrafts && userId == $mmSite.getUserId()) {
@@ -98,12 +98,8 @@ angular.module('mm.addons.mod_assign')
                 });
             });
         }).catch(function(message) {
-            if (message) {
-                $mmUtil.showErrorModal(message);
-            } else {
-                $mmUtil.showErrorModal('Error getting assigment data.');
-            }
-            leaveView();
+            $mmUtil.showErrorModalDefault(message, 'Error getting assigment data.');
+            blockData && blockData.back();
             return $q.reject();
         });
     }
@@ -137,7 +133,7 @@ angular.module('mm.addons.mod_assign')
         var modal,
             inputData = getInputData();
 
-        if ($scope.assign.requiresubmissionstatement && !inputData.submissionstatement) {
+        if ($scope.submissionStatement && !inputData.submissionstatement) {
             $mmUtil.showErrorModal('mma.mod_assign.acceptsubmissionstatement', true);
             return $q.reject();
         }
@@ -197,11 +193,7 @@ angular.module('mm.addons.mod_assign')
                     }
                 });
             }).catch(function(message) {
-                if (message) {
-                    $mmUtil.showErrorModal(message);
-                } else {
-                    $mmUtil.showErrorModal('Error saving submission.');
-                }
+                $mmUtil.showErrorModalDefault(message, 'Error saving submission.');
                 return $q.reject();
             }).finally(function() {
                 modal.dismiss();
@@ -211,13 +203,6 @@ angular.module('mm.addons.mod_assign')
 
     // Function called when user wants to leave view without saving.
     function leaveView() {
-        // Check that we're leaving the current view, since the user can navigate to other views from here.
-        if ($ionicHistory.currentView() !== currentView || !$scope.userSubmission) {
-            // It's another view.
-            originalBackFunction();
-            return;
-        }
-
         // Gather data to check if there's something to send.
         // Wait a bit before showing the modal because usually the hasDataChanged call will be resolved inmediately.
         var modal,
@@ -243,8 +228,6 @@ angular.module('mm.addons.mod_assign')
             // Nothing has changed or user confirmed to leave.
             // Clear temporary data from plugins.
             $mmaModAssignHelper.clearSubmissionPluginTmpData($scope.assign, $scope.userSubmission, getInputData());
-            // Leave the view.
-            originalBackFunction();
         }).catch(function(message) {
             if (message) {
                 $mmUtil.showErrorModal(message);
@@ -263,35 +246,23 @@ angular.module('mm.addons.mod_assign')
         $scope.assignmentLoaded = true;
     });
 
-    // Override Ionic's back button behavior.
-    $rootScope.$ionicGoBack = leaveView;
-    // Override Android's back button. We set a priority of 101 to override the "Return to previous view" action.
-    unregisterHardwareBack = $ionicPlatform.registerBackButtonAction(leaveView, 101);
-
     // Save the submission.
     $scope.save = function() {
         // Check if data has changed.
         hasDataChanged().then(function(changed) {
             if (changed) {
                 saveSubmission().then(function() {
-                    originalBackFunction();
+                    blockData && blockData.back();
                 });
             } else {
                 // Nothing to save, just go back.
-                originalBackFunction();
+                blockData && blockData.back();
             }
         });
     };
 
-    // Cancel.
-    $scope.cancel = function() {
-        leaveView();
-    };
-
     $scope.$on('$destroy', function() {
         // Restore original back functions.
-        unregisterHardwareBack();
-        $rootScope.$ionicGoBack = originalBackFunction;
         if ($scope.assign) {
             $mmSyncBlock.unblockOperation(mmaModAssignComponent, $scope.assign.id);
         }

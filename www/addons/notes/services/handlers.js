@@ -24,7 +24,7 @@ angular.module('mm.addons.notes')
  * @name $mmaNotesHandlers
  */
 .factory('$mmaNotesHandlers', function($mmaNotes, $mmSite, $mmApp, $ionicModal, $mmUtil, $q, $mmaNotesSync,
-            mmCoursesAccessMethods) {
+            mmCoursesAccessMethods, mmUserProfileHandlersTypeCommunication) {
 
     // We use "caches" to decrease network usage.
     var self = {},
@@ -68,7 +68,9 @@ angular.module('mm.addons.notes')
      */
     self.addNote = function() {
 
-        var self = {};
+        var self = {
+            type: mmUserProfileHandlersTypeCommunication
+        };
 
         /**
          * Check if handler is enabled.
@@ -84,9 +86,11 @@ angular.module('mm.addons.notes')
          *
          * @param {Object} user     User to check.
          * @param {Number} courseId Course ID.
+         * @param  {Object} [navOptions] Course navigation options for current user. See $mmCourses#getUserNavigationOptions.
+         * @param  {Object} [admOptions] Course admin options for current user. See $mmCourses#getUserAdministrationOptions.
          * @return {Promise}        Promise resolved with true if enabled, resolved with false otherwise.
          */
-        self.isEnabledForUser = function(user, courseId) {
+        self.isEnabledForUser = function(user, courseId, navOptions, admOptions) {
             // Active course required.
             if (!courseId || user.id == $mmSite.getUserId()) {
                 return $q.when(false);
@@ -121,6 +125,7 @@ angular.module('mm.addons.notes')
                 // Button title.
                 $scope.title = 'mma.notes.addnewnote';
                 $scope.class = 'mma-notes-add-handler';
+                $scope.icon = 'ion-ios-list';
 
                 $ionicModal.fromTemplateUrl('addons/notes/templates/add.html', {
                     scope: $scope,
@@ -143,8 +148,10 @@ angular.module('mm.addons.notes')
 
                     $mmaNotes.addNote(user.id, courseid, $scope.note.publishstate, $scope.note.text).then(function(sent) {
                         var message = sent ? 'mma.notes.eventnotecreated' : 'mm.core.datastoredoffline';
-                        $mmUtil.showModal('mm.core.success', message);
-                        $scope.closeModal();
+                        // Don't show success message until modal is closed. See https://github.com/driftyco/ionic/issues/9069
+                        $scope.modal.hide().then(function() {
+                            $mmUtil.showModal('mm.core.success', message);
+                        });
                     }, function(error) {
                         $mmUtil.showErrorModal(error);
                         $scope.processing = false;
@@ -196,14 +203,21 @@ angular.module('mm.addons.notes')
         /**
          * Check if handler is enabled for this course.
          *
-         * @param {Number} courseId   Course ID.
-         * @param {Object} accessData Type of access to the course: default, guest, ...
-         * @return {Boolean}          True if handler is enabled, false otherwise.
+         * @param  {Number} courseId     Course ID.
+         * @param  {Object} accessData   Type of access to the course: default, guest, ...
+         * @param  {Object} [navOptions] Course navigation options for current user. See $mmCourses#getUserNavigationOptions.
+         * @param  {Object} [admOptions] Course admin options for current user. See $mmCourses#getUserAdministrationOptions.
+         * @return {Boolean}             True if handler is enabled, false otherwise.
          */
-        self.isEnabledForCourse = function(courseId, accessData) {
+        self.isEnabledForCourse = function(courseId, accessData, navOptions, admOptions) {
             if (accessData && accessData.type == mmCoursesAccessMethods.guest) {
                 return false; // Not enabled for guests.
             }
+
+            if (navOptions && typeof navOptions.notes != 'undefined') {
+                return navOptions.notes;
+            }
+
             if (typeof coursesNavEnabledCache[courseId] != 'undefined') {
                 return coursesNavEnabledCache[courseId];
             }
