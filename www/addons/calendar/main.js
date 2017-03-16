@@ -15,7 +15,7 @@
 angular.module('mm.addons.calendar', [])
 
 .constant('mmaCalendarDaysInterval', 30)
-.constant('mmaCalendarDefaultNotifTime', 60)
+.constant('mmaCalendarDefaultNotifTime', 2880)
 .constant('mmaCalendarComponent', 'mmaCalendarEvents')
 .constant('mmaCalendarPriority', 400)
 .constant('mmaCalendarDefaultNotifTimeSetting', 'mmaCalendarDefaultNotifTime')
