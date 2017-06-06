@@ -1,0 +1,10 @@
+{
+  "name": "radixmobile",
+  "app_id": "",
+  "watchPatterns": [
+    "www/**/*.html",
+    "www/build/**/*",
+    "www/index.html",
+    "!www/lib/**/*"
+  ]
+}

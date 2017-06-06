@@ -15,7 +15,6 @@
     "currentlanguage": "Idioma actual",
     "deletesitefiles": "Esteu segur que voleu esborrar els fitxers baixats d'aquest lloc?",
     "deletesitefilestitle": "Elimina els fitxers del lloc",
-    "development": "Desenvolupament",
     "deviceinfo": "Informació del dispositiu",
     "deviceos": "OS del dispositiu",
     "devicewebworkers": "És compatible amb Device Web Workers",
@@ -48,19 +47,13 @@
     "sites": "Llocs",
     "spaceusage": "Utilització de l'espai",
     "storagetype": "Tipus d'emmagatzematge",
-    "success": "Èxit!",
     "synchronization": "Sincronització",
     "synchronizenow": "Sincronitza ara",
     "synchronizing": "S'està sincronitzant",
     "syncsettings": "Configuració de la sincronització",
     "syncsitesuccess": "S'han invalidat totes les dades sincronitzades i les memòries cau",
-<<<<<<< HEAD
-    "total": "Total"
-}
-=======
     "total": "Total",
     "versioncode": "Codi de la versió",
     "versionname": "Nom de la versió",
     "wificonnection": "Connexió Wi-Fi"
 }
->>>>>>> v3.1.0
