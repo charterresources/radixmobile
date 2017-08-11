@@ -92,7 +92,7 @@ $bar-side-menu-item-border-color: $button-light-border;
 $bar-side-menu-item-divider-color: $item-divider-bg;
 $bar-side-menu-item-background-color: $item-default-bg;
 $bar-side-menu-item-text-color: $item-default-text;
-$bar-side-menu-item-icon-color: $gray-darker;
+$bar-side-menu-item-icon-color: $blue;
 
 $toggle-on-default-bg: $mm-buttons-color;
 
@@ -156,11 +156,11 @@ $ionicons-font-path: "../lib/ionic/release/fonts" !default;
 }
 
 .action-sheet .button .icon {
-  color: $sheet-options-text-color;
+  color: $blue;
 }
 
 .platform-android .action-sheet .button .icon {
-  color: inherit;
+  color: $blue;
 }
 
 .bar-content .icon , .bar-side-menu .icon{
@@ -213,7 +213,7 @@ $ionicons-font-path: "../lib/ionic/release/fonts" !default;
     @include button-outline($button-default-border);
 
     &.button-icon {
-      color: $gray-darker;
+      color: $blue;
     }
   }
 }
