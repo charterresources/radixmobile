@@ -16,6 +16,8 @@
                             <img ng-src="{{event.icon}}">
                             <h2><mm-format-text watch="true">{{event.name}}</mm-format-text></h2>
                             <p>{{ event.timestart | mmToLocaleString }}</p>
+                            <p>{{ event.coursename }}</p>
+                            <p>{{ event.studentname }}</p>
                         </a>
                     </li>
                 </ul>
