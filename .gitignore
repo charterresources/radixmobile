@@ -10,3 +10,4 @@ www/build
 www/lib
 e2e/build
 /desktop
+.idea/
