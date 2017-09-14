@@ -19,6 +19,9 @@
                         <h3>{{ 'mm.core.course' | translate}}</h3>
                         <p><mm-format-text watch="true">{{coursename}}</mm-format-text></p>
                     </li>
+                    <li class="item item-text-wrap" ng-if="studentname">
+                        <p><mm-format-text watch="true">{{studentname}}</mm-format-text></p>
+                    </li>
                     <li class="item item-text-wrap item-media" ng-if="event.moduleicon">
                         <img ng-src="{{event.moduleicon}}"> {{event.modulename}}
                     </li>
