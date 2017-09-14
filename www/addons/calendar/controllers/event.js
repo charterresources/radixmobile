@@ -50,6 +50,14 @@ angular.module('mm.addons.calendar')
                 });
             }
 
+            if(isNaN($scope.coursename)) {
+                $scope.coursename = e.coursename;
+            }
+
+            if(e.studentname) {
+                $scope.studentname=e.studentname;
+            }
+
         }, function(error) {
             if (error) {
                 $mmUtil.showErrorModal(error);
