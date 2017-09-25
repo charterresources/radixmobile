@@ -1,0 +1,37 @@
+<ion-view view-title="{{ 'mma.mystudents.mystudents' | translate }}">
+    <ion-content mm-state-class delegate-handle="mmaMyStudentsListScroll">
+        <ion-refresher pulling-text="{{ 'mm.core.pulltorefresh' | translate }}"">
+        </ion-refresher>
+        <mm-loading hide-until="studentsLoaded">
+            <div class="list">
+                <section ng-repeat="student in students" class="list card" ng-click="onStudentSelected(student.id)">
+                    <div class="item item-avatar spark">
+                        <img src="img/user-avatar.png">
+                        <p style="font-size:20px;">{{student.firstname}} {{student.lastname }}</p>
+                    </div>
+                    <div class="row">
+                        <div class="col col-33 text-center">
+                            <div class="item" style="padding-left:0px;padding-right:0px;">
+                                <h1 class="spark blue">{{student.numofmissingassignmnets}}</h1>
+                                <h3 class="spark blue">{{ 'mma.mystudents.missing' | translate }}</h3>
+                            </div>
+                        </div>
+                        <div class="col col-33 text-center">
+                            <div class="item" style="padding-left:0px;padding-right:0px;">
+                                <h1 class="spark red">{{student.numofupcomingassignments}}</h1>
+                                <h3 class="spark red">{{ 'mma.mystudents.upcoming' | translate }}</h3>
+                            </div>
+                        </div>
+                        <div class="col col-33 text-center">
+                            <div class="item" style="padding-left:0px;padding-right:0px;">
+                                <h1 class="spark green">{{student.numofbelowassignmnets}}</h1>
+                                <h3 class="spark green">{{ 'mma.mystudents.below70' | translate }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+        </mm-loading>
+    </ion-content>
+</ion-view>
