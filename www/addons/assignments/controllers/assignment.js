@@ -83,7 +83,6 @@ angular.module('mm.addons.assignments')
                             for (var j = 0; j < e[i].belowgrades.length; j++) {
                                 if($stateParams.id == e[i].belowgrades[j].coursemoduleid) {
                                     $scope.coursename = e[i].coursename;
-                                    //$scope.duedate = e[i].belowgrades[j].duedate;
                                     $scope.dategraded = e[i].belowgrades[j].dategraded;
                                     $scope.grademax = e[i].belowgrades[j].grademax;
                                     $scope.title = e[i].belowgrades[j].title;
@@ -99,67 +98,5 @@ angular.module('mm.addons.assignments')
                 default:
             }
         }
-        // function refreshAssignmenst() {
-        //     $mmaAssignments.getStudentMissingAssignments().then(function(e) {
-        //         $scope.missingassignments=e;
-        //
-        //         $mmaAssignments.getStudentUpcomingAssignments().then(function(e) {
-        //             $scope.upcomingassignments=e;
-        //
-        //             $mmaAssignments.getStudentBelowGradesAssignments().then(function(e) {
-        //                 $scope.belowgradesassignments=e;
-        //             });
-        //         });
-        //     }).finally(init());
-        // }
-        //
-        // function init() {
-        //     var found=false;
-        //     if($stateParams.id) {
-        //         if($scope.missingassignments.length>0) {
-        //             var massign=$scope.missingassignments;
-        //             for (var i = 0; i < massign.length; i++) {
-        //                 for (var j = 0; j < massign[i].missingassignments.length; j++) {
-        //                     if(assignmentid == massign[i].missingassignments[j].coursemoduleid) {
-        //                         $scope.assignment = massign[i].missingassignments[j];
-        //                         found=true;
-        //                         break;
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //         if(!found && $scope.upcomingassignments.length>0) {
-        //             var uassign=$mmaAssignments.upcomingassignments;
-        //             for (var i = 0; i < uassign.length; i++) {
-        //                 for (var j = 0; j < uassign[i].upcomingassignments.length; j++) {
-        //                     if(assignmentid == uassign[i].upcomingassignments[j].coursemoduleid) {
-        //                         $scope.assignment = uassign[i].upcomingassignments[j];
-        //                         found=true;
-        //                         break;
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //         if(!found && $scope.belowgradesassignments.length>0) {
-        //             var uassign=$scope.belowgradesassignments;
-        //             for (var i = 0; i < uassign.length; i++) {
-        //                 for (var j = 0; j < uassign[i].belowgradesassignments.length; j++) {
-        //                     if(assignmentid == uassign[i].belowgradesassignments[j].coursemoduleid) {
-        //                         $scope.assignment = uassign[i].belowgradesassignments[j];
-        //                         found=true;
-        //                         break;
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        //     else {
-        //         // if($scope.students.length > 0) {
-        //         //     $scope.setCurrentStudentById($scope.students[0].id);
-        //         // }
-        //     }
-        // }
-        // refreshAssignmenst();
-        //init();
         getAssignment();
     });

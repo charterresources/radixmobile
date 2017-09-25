@@ -23,7 +23,7 @@ angular.module('mm.addons.assignments')
  * @ngdoc service
  * @name $mmaAssignments
  */
-    .factory('$mmaAssignments', function($q, $log, $mmSite, $mmCourse) {
+    .factory('$mmaAssignments', function($q, $log, $mmSite) {
 
         $log = $log.getInstance('$mmaAssignments');
 
@@ -33,14 +33,7 @@ angular.module('mm.addons.assignments')
             belowgrades = {};
 
 
-        /**
-         * Get cache key for notification list WS calls.
-         *
-         * @return {String} Cache key.
-         */
-        function getAssignmentsCacheKey() {
-            return 'mmaAssignments:list';
-        };
+
 
         /**
          * Get commendation from site.
@@ -79,9 +72,8 @@ angular.module('mm.addons.assignments')
         self.getStudentMissingAssignments = function() {
 
             $log.debug('Get students for parent');
-            // $mmSite.setCurrentStudentId(sstudentid);
+
             var data = {
-                // studentid: sstudentid
                 studentid: $mmSite.currentStudentIdForParent
             };
             var preSets = {
@@ -108,9 +100,8 @@ angular.module('mm.addons.assignments')
         self.getStudentUpcomingAssignments = function() {
 
             $log.debug('Get students for parent');
-            // $mmSite.setCurrentStudentId(sstudentid);
+
             var data = {
-                // studentid: sstudentid
                 studentid: $mmSite.currentStudentIdForParent
             };
             var preSets = {
@@ -137,9 +128,8 @@ angular.module('mm.addons.assignments')
         self.getStudentBelowGradesAssignments = function() {
 
             $log.debug('Get students for parent');
-            // $mmSite.setCurrentStudentId(sstudentid);
+
             var data = {
-                // studentid: sstudentid
                 studentid: $mmSite.currentStudentIdForParent
             };
             var preSets = {

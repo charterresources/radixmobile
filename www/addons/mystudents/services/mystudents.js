@@ -23,7 +23,7 @@ angular.module('mm.addons.mystudents')
  * @ngdoc service
  * @name $mmaCommendation
  */
-    .factory('$mmaMyStudents', function($q, $log, $mmSite, $mmSitesManager, mmaCommendationListLimit) {
+    .factory('$mmaMyStudents', function($q, $log, $mmSite) {
 
         $log = $log.getInstance('$mmaMyStudents');
 
@@ -49,13 +49,13 @@ angular.module('mm.addons.mystudents')
          * @param {Number} limitNumber Number of notifications to get.
          * @return {Promise}           Promise resolved with notifications.
          */
-        self.getMyStudents = function(studentid) {
+        self.getMyStudents = function() {
 
             $log.debug('Get students for parent');
 
             var data = {
-                parentid: $mmSite.getUserId(),
-                studentid: studentid
+                parentid: $mmSite.getUserId()
+                //studentid: studentid
             };
             var preSets = {
                 //cacheKey: getCommendationCacheKey()

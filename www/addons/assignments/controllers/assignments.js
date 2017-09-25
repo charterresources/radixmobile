@@ -21,10 +21,8 @@ angular.module('mm.addons.assignments')
  * @ngdoc controller
  * @name mmaAssignmentsCtrl
  */
-    .controller('mmaAssignmentsCtrl', function($scope,$mmSite, $ionicTabsDelegate, $stateParams, $log,$mmaAssignments, $state,  $mmUtil, $timeout, $mmEvents,
-                                               mmaCalendarDaysInterval, $ionicScrollDelegate, $mmLocalNotifications, $mmCourses, mmaCalendarDefaultNotifTimeChangedEvent,
-                                               $ionicPopover, $q, $translate, $ionicPlatform
-    ) {
+    .controller('mmaAssignmentsCtrl', function($scope,$mmSite, $ionicTabsDelegate, $stateParams, $log,
+                                               $mmaAssignments, $mmaMyStudents) {
 
         $log = $log.getInstance('mmaAssignmentsCtrl');
 
@@ -82,7 +80,7 @@ angular.module('mm.addons.assignments')
             });
         }
 
-        $mmaAssignments.getMyStudents().then(function(students) {
+        $mmaMyStudents.getMyStudents().then(function(students) {
             $scope.students = students;
         }).finally(function() {
             $scope.studentsLoaded = true;

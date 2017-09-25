@@ -24,7 +24,7 @@ angular.module('mm.addons.mystudents')
  * @ngdoc service
  * @name $mmaCommendationHandlers
  */
-    .factory('$mmaMyStudentsHandlers', function($log, $mmaMyStudents) {
+    .factory('$mmaMyStudentsHandlers', function($log) {
 
         $log = $log.getInstance('$mmaMyStudentsHandlers');
 
