@@ -1,0 +1,20 @@
+// Color palette
+$spark-green:     #67a584;
+$spark-blue:      #32a7c7;
+$spark-red:       #c9645c;
+
+.spark{
+  &.blue{
+    color:$spark-blue;
+  };
+  &.red{
+    color:$spark-red;
+  };
+  &.green{
+    color:$spark-green;
+  }
+
+  &.item-avatar{
+    padding-top:26px; //centers text with image
+  }
+}
