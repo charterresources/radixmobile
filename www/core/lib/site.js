@@ -561,5 +561,47 @@ angular.module('mm.core')
         return typeof currentSite != 'undefined' && typeof currentSite.token != 'undefined' && currentSite.token != '';
     };
 
+    /**
+     * Check if the user is parent in a site.
+     *
+     * @module mm.core
+     * @ngdoc method
+     * @name $mmSite#isLoggedIn
+     * @return {Boolean} True if the user is parent in a site, false otherwise.
+     */
+    self.isUserParent = function() {
+        var data = {
+            parentid: self.getUserId()
+        };
+        var preSets = {
+            //cacheKey: getCommendationCacheKey()
+        };
+        self.read('spark_dashboard_get_students', data, preSets).then(function(response) {
+
+            if (response.students) {
+                return true;
+            } else {
+                return false;
+            }
+        });
+    };
+    self.setCurrentStudentId = function(studentId) {
+        self.currentStudentIdForParent = studentId;
+    };
+    self.currentStudentIdForParent = null;
+
+    /**
+     * Check if the user is logged in a site.
+     *
+     * @module mm.core
+     * @ngdoc method
+     * @name $mmSite#isLoggedIn
+     * @return {Boolean} True if the user is logged in a site, false otherwise.
+     */
+    self.isLoggedIn = function() {
+        var currentSite = $mmSitesManager.getCurrentSite();
+        return typeof currentSite != 'undefined' && typeof currentSite.token != 'undefined' && currentSite.token != '';
+    };
+
     return self;
 });

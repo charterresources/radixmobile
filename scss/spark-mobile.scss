@@ -1,0 +1,43 @@
+// Color palette
+$spark-green:     #67a584;
+$spark-blue:      #32a7c7;
+$spark-red:       #c9645c;
+
+.spark{
+  &.blue{
+    color:$spark-blue;
+  };
+  &.red{
+    color:$spark-red;
+  };
+  &.green{
+    color:$spark-green;
+  }
+
+  &.item-avatar{
+    padding-top:26px; //centers text with image
+  }
+
+  &.button-active{
+    font-size: 16px;
+    border-color: darken(#0064d2,20);
+    background-color: #0064d2;
+    box-shadow: none;
+    color: white !important;
+    font-weight: 15px !important;
+  }
+  .tabs{
+    height: 40px;
+  }
+}
+
+
+.tabs-top > .tabs .tab-item.tab-item-active .badge{
+  top:13%;
+}
+.tab-item .badge{
+  right: calc(50% - 46px);
+  top:13%;
+  line-height: 14px;
+  font-size: 12px;
+}
