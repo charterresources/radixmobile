@@ -21,7 +21,7 @@ angular.module('mm.addons.assignments')
  * @ngdoc controller
  * @name mmaAssignmentsCtrl
  */
-    .controller('mmaAssignmentsCtrl', function($scope,$mmSite, $ionicTabsDelegate, $stateParams, $log,
+    .controller('mmaAssignmentsCtrl', function($scope, $mmSite, $ionicTabsDelegate, $stateParams, $log,
                                                $mmaAssignments, $mmaMyStudents) {
 
         $log = $log.getInstance('mmaAssignmentsCtrl');
@@ -32,20 +32,25 @@ angular.module('mm.addons.assignments')
         $scope.upcomingassignments = null;
         $scope.belowgradesassignments = null;
         $scope.studentsLoaded = false;
+        $scope.isparentuser = $mmSite.getInfo().isparentuser;
 
         $scope.setCurrentStudentById = function(studentId) {
+            $scope.eventsLoaded = false;
             for (var i = 0; i < $scope.students.length; i++) {
                 if ($scope.students[i].id === studentId) {
                     $scope.currentStudent = $scope.students[i];
-                    $mmSite.setCurrentStudentId(studentId);
+                    if($mmSite.currentStudentIdForParent!==studentId) {
+                        $mmSite.setCurrentStudentId(studentId);
+                    }
                     break;
                 }
             }
             refreshAssignmenst();
+            $scope.eventsLoaded = true;
         }
 
         $scope.eventToLoad = 1;
-        $scope.eventsLoaded = true;
+        $scope.eventsLoaded = false;
 
 
 
@@ -55,10 +60,10 @@ angular.module('mm.addons.assignments')
 
         $scope.isActive1=true;
 
-        function init() {
-            if($stateParams.id) {
+        var initialize=function() {
+            if($stateParams.sid) {
                 if($scope.students.length > 0) {
-                    $scope.setCurrentStudentById($stateParams.id);
+                    $scope.setCurrentStudentById($stateParams.sid);
                 }
             }
             else {
@@ -66,7 +71,7 @@ angular.module('mm.addons.assignments')
                     $scope.setCurrentStudentById($scope.students[0].id);
                 }
             }
-        }
+        };
 
         function refreshAssignmenst() {
             $mmaAssignments.getStudentMissingAssignments().then(function(e) {
@@ -84,7 +89,7 @@ angular.module('mm.addons.assignments')
             $scope.students = students;
         }).finally(function() {
             $scope.studentsLoaded = true;
-            init();
+            initialize();
         });
 
     });

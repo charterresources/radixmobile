@@ -1,6 +1,6 @@
 
 <ion-view view-title="{{ 'mma.assignments.assignments' | translate }}">
-    <mm-split-view load-when="eventsLoaded" load="{{eventToLoad}}" component="mmaAssignmentsList" menu-state="site.assignments/id?">
+    <mm-split-view load-when="eventsLoaded" load="{{eventToLoad}}" component="mmaAssignmentsList" menu-state="site.assignments">
 
         <ion-tabs class="spark tabs-positive tabs-top">
 
@@ -84,7 +84,7 @@
                                                 <img ng-src="{{assignment.icon}}">
                                                 <h2><mm-format-text watch="true">{{assignment.title}}</mm-format-text></h2>
                                                 <p>{{ assignment.duedate | mmToLocaleString }}</p>
-                                                <p style="color:red;" n-if="{{assignment.feedback}}">{{ assignment.feedback }}</p>
+                                                <p style="color:red;" ng-if="assignment.feedback">{{ assignment.feedback }}</p>
                                             </a>
                                         </li>
                                     </ul>
@@ -100,7 +100,7 @@
 
 
     </mm-split-view>
-    <ion-footer-bar style="padding-top:5px;border-style:none" class="bar-stable tabs">
+    <ion-footer-bar ng-if="isparentuser" style="padding-top:5px;border-style:none" class="bar-stable tabs">
         <div class="button-bar button-small" >
             <a class="button" ng-class="{'spark button-active': isCurrent(student.id)}" ng-repeat="student in students" ng-click="setCurrentStudentById(student.id)">
                 {{student.firstname}} {{student.lastname }}</a>

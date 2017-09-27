@@ -45,7 +45,7 @@ angular.module('mm.addons.mystudents')
 
         $scope.onStudentSelected=function(studentId){
             if(studentId) {
-                $state.go('site.assignments', {id: studentId});
+                $state.go('site.assignments', {sid: studentId});
             }
         };
     });
