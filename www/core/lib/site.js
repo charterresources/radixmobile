@@ -562,29 +562,13 @@ angular.module('mm.core')
     };
 
     /**
-     * Check if the user is parent in a site.
-     *
+     * Set the current student id in a site.
+     * by Dovlet Jumayev
+     * 09/27/2017
      * @module mm.core
      * @ngdoc method
-     * @name $mmSite#isLoggedIn
-     * @return {Boolean} True if the user is parent in a site, false otherwise.
+     * @name $mmSite#setCurrentStudentId
      */
-    self.isUserParent = function() {
-        var data = {
-            parentid: self.getUserId()
-        };
-        var preSets = {
-            //cacheKey: getCommendationCacheKey()
-        };
-        self.read('spark_dashboard_get_students', data, preSets).then(function(response) {
-
-            if (response.students) {
-                return true;
-            } else {
-                return false;
-            }
-        });
-    };
     self.setCurrentStudentId = function(studentId) {
         self.currentStudentIdForParent = studentId;
     };

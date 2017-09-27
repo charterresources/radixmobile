@@ -24,7 +24,7 @@ angular.module('mm.addons.mystudents')
  * @ngdoc service
  * @name $mmaCommendationHandlers
  */
-    .factory('$mmaMyStudentsHandlers', function($log, $mmaMyStudents) {
+    .factory('$mmaMyStudentsHandlers', function($log, $translate, $mmSite) {
 
         $log = $log.getInstance('$mmaMyStudentsHandlers');
 
@@ -47,7 +47,10 @@ angular.module('mm.addons.mystudents')
              * @return {Boolean} True if handler is enabled, false otherwise.
              */
             self.isEnabled = function() {
-                return true;
+                if($mmSite.getInfo().isparentuser) {
+                    return true;
+                }
+                return false;
             };
 
             /**
@@ -65,8 +68,8 @@ angular.module('mm.addons.mystudents')
                  * @name $mmaCommendationHandlers#sideMenuNav:controller
                  */
                 return function($scope) {
-                    $scope.icon = 'ion-easel';
-                    $scope.title = 'My Students';
+                    $scope.icon = 'ion-university';
+                    $scope.title = $translate.instant('mma.mystudents.mystudents');
                     $scope.state = 'site.mystudents';
                 };
             };

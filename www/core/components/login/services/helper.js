@@ -222,6 +222,9 @@ angular.module('mm.core.login')
             }
 
             return promise.then(function(frontpage) {
+                if($mmSite.getInfo().isparentuser) {
+                    return $state.go('site.mystudents');
+                }
                 // Check avalaibility in priority order.
                 if (frontpage) {
                     return $state.go('site.frontpage');

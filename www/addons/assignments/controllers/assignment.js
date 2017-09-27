@@ -21,7 +21,7 @@ angular.module('mm.addons.assignments')
  * @ngdoc controller
  * @name mmaCalendarEventCtrl
  */
-    .controller('mmaAssignmentCtrl', function($scope, $log, $stateParams, $mmaAssignments) {
+    .controller('mmaAssignmentCtrl', function($scope, $log, $stateParams, $mmaAssignments, $mmUser, $mmSite, $translate, $sce) {
 
         $log = $log.getInstance('mmaAssignmentCtrl');
 
@@ -36,6 +36,9 @@ angular.module('mm.addons.assignments')
         $scope.itemmodule = null;
         $scope.feedback = null;
         $scope.icon = null;
+        $scope.studentfullname = null;
+        $scope.assignmenttype = null;
+        $scope.description = null;
 
         function getAssignment() {
             switch ($stateParams.type) {
@@ -52,6 +55,8 @@ angular.module('mm.addons.assignments')
                                     $scope.itemmodule = e[i].missingassignments[j].itemmodule;
                                     $scope.feedback = e[i].missingassignments[j].feedback;
                                     $scope.icon = e[i].missingassignments[j].icon;
+                                    $scope.assignmenttype = $translate.instant('mma.assignments.missing');
+                                    $scope.description = $sce.trustAsHtml(e[i].missingassignments[j].description);
                                     break;
                                 }
                             }
@@ -71,6 +76,8 @@ angular.module('mm.addons.assignments')
                                     $scope.itemmodule = e[i].upcomingassignments[j].itemmodule;
                                     $scope.feedback = e[i].upcomingassignments[j].feedback;
                                     $scope.icon = e[i].upcomingassignments[j].icon;
+                                    $scope.assignmenttype = $translate.instant('mma.assignments.upcoming');
+                                    $scope.description = $sce.trustAsHtml(e[i].upcomingassignments[j].description);
                                     break;
                                 }
                             }
@@ -83,13 +90,14 @@ angular.module('mm.addons.assignments')
                             for (var j = 0; j < e[i].belowgrades.length; j++) {
                                 if($stateParams.id == e[i].belowgrades[j].coursemoduleid) {
                                     $scope.coursename = e[i].coursename;
-                                    //$scope.duedate = e[i].belowgrades[j].duedate;
                                     $scope.dategraded = e[i].belowgrades[j].dategraded;
                                     $scope.grademax = e[i].belowgrades[j].grademax;
                                     $scope.title = e[i].belowgrades[j].title;
                                     $scope.itemmodule = e[i].belowgrades[j].itemmodule;
                                     $scope.feedback = e[i].belowgrades[j].feedback;
                                     $scope.icon = e[i].belowgrades[j].icon;
+                                    $scope.assignmenttype = $translate.instant('mma.assignments.lowgrade');
+                                    $scope.description = $sce.trustAsHtml(e[i].belowgrades[j].description);
                                     break;
                                 }
                             }
@@ -99,67 +107,13 @@ angular.module('mm.addons.assignments')
                 default:
             }
         }
-        // function refreshAssignmenst() {
-        //     $mmaAssignments.getStudentMissingAssignments().then(function(e) {
-        //         $scope.missingassignments=e;
-        //
-        //         $mmaAssignments.getStudentUpcomingAssignments().then(function(e) {
-        //             $scope.upcomingassignments=e;
-        //
-        //             $mmaAssignments.getStudentBelowGradesAssignments().then(function(e) {
-        //                 $scope.belowgradesassignments=e;
-        //             });
-        //         });
-        //     }).finally(init());
-        // }
-        //
-        // function init() {
-        //     var found=false;
-        //     if($stateParams.id) {
-        //         if($scope.missingassignments.length>0) {
-        //             var massign=$scope.missingassignments;
-        //             for (var i = 0; i < massign.length; i++) {
-        //                 for (var j = 0; j < massign[i].missingassignments.length; j++) {
-        //                     if(assignmentid == massign[i].missingassignments[j].coursemoduleid) {
-        //                         $scope.assignment = massign[i].missingassignments[j];
-        //                         found=true;
-        //                         break;
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //         if(!found && $scope.upcomingassignments.length>0) {
-        //             var uassign=$mmaAssignments.upcomingassignments;
-        //             for (var i = 0; i < uassign.length; i++) {
-        //                 for (var j = 0; j < uassign[i].upcomingassignments.length; j++) {
-        //                     if(assignmentid == uassign[i].upcomingassignments[j].coursemoduleid) {
-        //                         $scope.assignment = uassign[i].upcomingassignments[j];
-        //                         found=true;
-        //                         break;
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //         if(!found && $scope.belowgradesassignments.length>0) {
-        //             var uassign=$scope.belowgradesassignments;
-        //             for (var i = 0; i < uassign.length; i++) {
-        //                 for (var j = 0; j < uassign[i].belowgradesassignments.length; j++) {
-        //                     if(assignmentid == uassign[i].belowgradesassignments[j].coursemoduleid) {
-        //                         $scope.assignment = uassign[i].belowgradesassignments[j];
-        //                         found=true;
-        //                         break;
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        //     else {
-        //         // if($scope.students.length > 0) {
-        //         //     $scope.setCurrentStudentById($scope.students[0].id);
-        //         // }
-        //     }
-        // }
-        // refreshAssignmenst();
-        //init();
+
+        function setUpStudentInfo() {
+            $mmUser.getUserFromWS($mmSite.currentStudentIdForParent).then(function (student) {
+                $scope.studentfullname = student.fullname;
+            })
+        };
+
+        setUpStudentInfo();
         getAssignment();
     });

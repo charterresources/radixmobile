@@ -24,7 +24,7 @@ angular.module('mm.addons.assignments')
  * @ngdoc service
  * @name $mmaAssignmentsHandlers
  */
-    .factory('$mmaAssignmentsHandlers', function($log) {
+    .factory('$mmaAssignmentsHandlers', function($log, $mmSite) {
 
         $log = $log.getInstance('$mmaAssignmentsHandlers');
 
@@ -47,7 +47,10 @@ angular.module('mm.addons.assignments')
              * @return {Boolean} True if handler is enabled, false otherwise.
              */
             self.isEnabled = function() {
-                return true;
+                if($mmSite.getInfo().isparentuser || $mmSite.getInfo().isstudentuser) {
+                    return true;
+                }
+                return false;
             };
 
             /**
@@ -65,7 +68,7 @@ angular.module('mm.addons.assignments')
                  * @name $mmaassignmentsHandlers#sideMenuNav:controller
                  */
                 return function($scope) {
-                    $scope.icon = 'ion-easel';
+                    $scope.icon = 'ion-ios-list';
                     $scope.title = 'mma.assignments.assignments';
                     $scope.state = 'site.assignments';
                 };

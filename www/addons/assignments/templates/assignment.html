@@ -10,7 +10,13 @@
                 <ul class="list card">
                     <li class="item item-media item-text-wrap" ng-if="title">
                         <img ng-src="{{icon}}">
+                        <h3><mm-format-text watch="true">{{ 'mma.assignments.assignmenttype' | translate}}: {{assignmenttype}}</mm-format-text></h3>
                         <h2><mm-format-text watch="true">{{title}}</mm-format-text></h2>
+                    </li>
+                    <li class="item item-text-wrap" ng-if="description">
+                        <h3>{{ 'mma.assignments.description' | translate}}</h3>
+                        <!--{{ introduction }}-->
+                        <div data-ng-bind-html="description"></div>
                     </li>
                     <li class="item item-text-wrap" ng-if="duedate">
                         <h3>{{ 'mma.assignments.duedate' | translate}}</h3>
@@ -31,6 +37,10 @@
                     <li class="item item-text-wrap" ng-if="feedback">
                         <h3>{{ 'mma.assignments.feedback' | translate}}</h3>
                         <p><mm-format-text watch="true">{{feedback}}</mm-format-text></p>
+                    </li>
+                    <li class="item item-text-wrap" ng-if="studentfullname">
+                        <h3>{{ 'mma.mystudents.student' | translate}}</h3>
+                        <p><mm-format-text watch="true">{{studentfullname}}</mm-format-text></p>
                     </li>
                 </ul>
             </article>

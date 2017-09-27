@@ -23,24 +23,11 @@ angular.module('mm.addons.assignments')
  * @ngdoc service
  * @name $mmaAssignments
  */
-    .factory('$mmaAssignments', function($q, $log, $mmSite, $mmCourse) {
+    .factory('$mmaAssignments', function($q, $log, $mmSite) {
 
         $log = $log.getInstance('$mmaAssignments');
 
-        var self = {},
-            missingassignments = {},
-            upcomingassignments = {},
-            belowgrades = {};
-
-
-        /**
-         * Get cache key for notification list WS calls.
-         *
-         * @return {String} Cache key.
-         */
-        function getAssignmentsCacheKey() {
-            return 'mmaAssignments:list';
-        };
+        var self = {};
 
         /**
          * Get commendation from site.
@@ -53,35 +40,34 @@ angular.module('mm.addons.assignments')
          * @param {Number} limitNumber Number of notifications to get.
          * @return {Promise}           Promise resolved with notifications.
          */
-        self.getMyStudents = function() {
-
-            $log.debug('Get students for parent');
-
-            var data = {
-                parentid: $mmSite.getUserId()
-            };
-            var preSets = {
-                //cacheKey: getCommendationCacheKey()
-            };
-
-            // Get unread notifications.
-            return $mmSite.read('spark_dashboard_get_students', data, preSets).then(function(response) {
-
-                if (response.students) {
-                    var students = response.students;
-                    return students;
-                } else {
-                    return $q.reject();
-                }
-            });
-        };
+        // self.getMyStudents = function() {
+        //
+        //     $log.debug('Get student(s)');
+        //
+        //     var data = {
+        //         userid: $mmSite.getUserId()
+        //     };
+        //     var preSets = {
+        //         //cacheKey: getCommendationCacheKey()
+        //     };
+        //
+        //     // Get unread notifications.
+        //     return $mmSite.read('spark_dashboard_get_students', data, preSets).then(function(response) {
+        //
+        //         if (response.students) {
+        //             var students = response.students;
+        //             return students;
+        //         } else {
+        //             return $q.reject();
+        //         }
+        //     });
+        // };
 
         self.getStudentMissingAssignments = function() {
 
             $log.debug('Get students for parent');
-            // $mmSite.setCurrentStudentId(sstudentid);
+
             var data = {
-                // studentid: sstudentid
                 studentid: $mmSite.currentStudentIdForParent
             };
             var preSets = {
@@ -108,9 +94,8 @@ angular.module('mm.addons.assignments')
         self.getStudentUpcomingAssignments = function() {
 
             $log.debug('Get students for parent');
-            // $mmSite.setCurrentStudentId(sstudentid);
+
             var data = {
-                // studentid: sstudentid
                 studentid: $mmSite.currentStudentIdForParent
             };
             var preSets = {
@@ -137,9 +122,8 @@ angular.module('mm.addons.assignments')
         self.getStudentBelowGradesAssignments = function() {
 
             $log.debug('Get students for parent');
-            // $mmSite.setCurrentStudentId(sstudentid);
+
             var data = {
-                // studentid: sstudentid
                 studentid: $mmSite.currentStudentIdForParent
             };
             var preSets = {
@@ -161,28 +145,6 @@ angular.module('mm.addons.assignments')
                     return $q.reject();
                 }
             });
-        };
-
-
-        self.getMissingAssignments= function () {
-            return missingassignments;
-        };
-        self.setMissingAssignments= function (missingassignmentsParameter) {
-            missingassignments = missingassignmentsParameter;
-        };
-
-        self.getUpcomingAssignments= function () {
-            return upcomingassignments;
-        };
-        self.setUpcomingAssignments= function (upcomingAssignmentsParameter) {
-            upcomingassignments = upcomingAssignmentsParameter;
-        };
-
-        self.getBelowGradesAssignments= function () {
-            return belowgrades;
-        };
-        self.setBelowGradesAssignments= function (belowGradesAssignmentsParameter) {
-            belowgrades = belowGradesAssignmentsParameter;
         };
 
         return self;

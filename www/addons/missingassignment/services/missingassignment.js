@@ -148,6 +148,7 @@ angular.module('mm.addons.missingassignment')
      * @return {Boolean} True if plugin is available, false otherwise.
      */
     self.isPluginEnabled = function() {
+       return false;
         return $mmSite.wsAvailable('core_message_get_messages');
     };
 
