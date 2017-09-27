@@ -10,5 +10,7 @@
   "dategraded": "Date graded",
   "grademax": "Grade/Max",
   "title": "Title",
-  "feedback": "Feedback"
+  "feedback": "Feedback",
+  "assignmenttype": "Assignment type",
+  "description": "Description"
 }

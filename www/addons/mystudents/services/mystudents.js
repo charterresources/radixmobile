@@ -54,7 +54,7 @@ angular.module('mm.addons.mystudents')
             $log.debug('Get students for parent');
 
             var data = {
-                parentid: $mmSite.getUserId()
+                userid: $mmSite.getUserId()
                 //studentid: studentid
             };
             var preSets = {

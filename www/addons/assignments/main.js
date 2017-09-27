@@ -1,11 +1,10 @@
 angular.module('mm.addons.assignments', ['mm.core'])
 
-    .constant('mmaAssignmentsPriority', 2200)
+    .constant('mmaAssignmentsPriority', 1000)
 
     .config(function($stateProvider, $mmSideMenuDelegateProvider, mmaAssignmentsPriority) {
 
         $stateProvider
-
             .state('site.assignments', {
                 url: '/assignments',
                 views: {
@@ -15,20 +14,16 @@ angular.module('mm.addons.assignments', ['mm.core'])
                     }
                 },
                 params: {
-                    id: null
+                    sid: null
                 }
             })
             .state('site.assignment-type', {
-                url: '/assignment-type',
+                url: '/assignment-type/:type/:id',
                 views: {
                     'site': {
                         controller: 'mmaAssignmentCtrl',
                         templateUrl: 'addons/assignments/templates/assignment.html'
                     }
-                },
-                params: {
-                    type: null,
-                    id: null
                 }
             })
             .state('site.assignments-student', {

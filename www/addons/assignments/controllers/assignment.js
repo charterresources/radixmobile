@@ -21,7 +21,7 @@ angular.module('mm.addons.assignments')
  * @ngdoc controller
  * @name mmaCalendarEventCtrl
  */
-    .controller('mmaAssignmentCtrl', function($scope, $log, $stateParams, $mmaAssignments) {
+    .controller('mmaAssignmentCtrl', function($scope, $log, $stateParams, $mmaAssignments, $mmUser, $mmSite, $translate, $sce) {
 
         $log = $log.getInstance('mmaAssignmentCtrl');
 
@@ -36,6 +36,9 @@ angular.module('mm.addons.assignments')
         $scope.itemmodule = null;
         $scope.feedback = null;
         $scope.icon = null;
+        $scope.studentfullname = null;
+        $scope.assignmenttype = null;
+        $scope.description = null;
 
         function getAssignment() {
             switch ($stateParams.type) {
@@ -52,6 +55,8 @@ angular.module('mm.addons.assignments')
                                     $scope.itemmodule = e[i].missingassignments[j].itemmodule;
                                     $scope.feedback = e[i].missingassignments[j].feedback;
                                     $scope.icon = e[i].missingassignments[j].icon;
+                                    $scope.assignmenttype = $translate.instant('mma.assignments.missing');
+                                    $scope.description = $sce.trustAsHtml(e[i].missingassignments[j].description);
                                     break;
                                 }
                             }
@@ -71,6 +76,8 @@ angular.module('mm.addons.assignments')
                                     $scope.itemmodule = e[i].upcomingassignments[j].itemmodule;
                                     $scope.feedback = e[i].upcomingassignments[j].feedback;
                                     $scope.icon = e[i].upcomingassignments[j].icon;
+                                    $scope.assignmenttype = $translate.instant('mma.assignments.upcoming');
+                                    $scope.description = $sce.trustAsHtml(e[i].upcomingassignments[j].description);
                                     break;
                                 }
                             }
@@ -89,6 +96,8 @@ angular.module('mm.addons.assignments')
                                     $scope.itemmodule = e[i].belowgrades[j].itemmodule;
                                     $scope.feedback = e[i].belowgrades[j].feedback;
                                     $scope.icon = e[i].belowgrades[j].icon;
+                                    $scope.assignmenttype = $translate.instant('mma.assignments.lowgrade');
+                                    $scope.description = $sce.trustAsHtml(e[i].belowgrades[j].description);
                                     break;
                                 }
                             }
@@ -98,5 +107,13 @@ angular.module('mm.addons.assignments')
                 default:
             }
         }
+
+        function setUpStudentInfo() {
+            $mmUser.getUserFromWS($mmSite.currentStudentIdForParent).then(function (student) {
+                $scope.studentfullname = student.fullname;
+            })
+        };
+
+        setUpStudentInfo();
         getAssignment();
     });
