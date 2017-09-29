@@ -65,7 +65,7 @@ angular.module('mm.addons.assignments')
                  *
                  * @module mm.addons.assignments
                  * @ngdoc controller
-                 * @name $mmaassignmentsHandlers#sideMenuNav:controller
+                 * @name $mmaAssignmentsHandlers#sideMenuNav:controller
                  */
                 return function($scope) {
                     $scope.icon = 'ion-ios-list';

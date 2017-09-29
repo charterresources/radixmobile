@@ -23,58 +23,65 @@ angular.module('mm.addons.assignments')
  * @ngdoc service
  * @name $mmaAssignments
  */
-    .factory('$mmaAssignments', function($q, $log, $mmSite) {
+    .factory('$mmaAssignments', function($q, $log, $mmSite, $mmSitesManager) {
 
         $log = $log.getInstance('$mmaAssignments');
 
         var self = {};
 
         /**
-         * Get commendation from site.
+         * Get cache key for get Student MissingAssignments WS call.
          *
-         * @module mm.addons.notifications
+         * @return {String}       Cache key.
+         */
+        function getStudentMissingAssignmentsCacheKey() {
+            return 'mmaAssignments:missingassignments';
+        }
+
+        /**
+         * Get cache key for get Student UpcomingAssignments WS call.
+         *
+         * @return {String}       Cache key.
+         */
+        function getStudentUpcomingAssignmentsCacheKey() {
+            return 'mmaAssignments:upcomingassignments';
+        }
+
+        /**
+         * Get cache key for get Student BelowGradesAssignments WS call.
+         *
+         * @return {String}       Cache key.
+         */
+        function getStudentBelowGradesAssignmentsCacheKey() {
+            return 'mmaAssignments:belowgradesassignments';
+        }
+
+        /**
+         * Get students' missing assignments from site.
+         *
+         * @module mm.addons.assignments
          * @ngdoc method
-         * @name $mmaNotifications#getNotifications
-         * @param {Boolean} read       True if should get read notifications, false otherwise.
-         * @param {Number} limitFrom   Position of the first notification to get.
-         * @param {Number} limitNumber Number of notifications to get.
+         * @name $mmaAssignments#getStudentMissingAssignments
+         * @param {Boolean} [refresh] True when we should not get the value from the cache.
          * @return {Promise}           Promise resolved with notifications.
          */
-        // self.getMyStudents = function() {
-        //
-        //     $log.debug('Get student(s)');
-        //
-        //     var data = {
-        //         userid: $mmSite.getUserId()
-        //     };
-        //     var preSets = {
-        //         //cacheKey: getCommendationCacheKey()
-        //     };
-        //
-        //     // Get unread notifications.
-        //     return $mmSite.read('spark_dashboard_get_students', data, preSets).then(function(response) {
-        //
-        //         if (response.students) {
-        //             var students = response.students;
-        //             return students;
-        //         } else {
-        //             return $q.reject();
-        //         }
-        //     });
-        // };
+        self.getStudentMissingAssignments = function(refresh) {
 
-        self.getStudentMissingAssignments = function() {
-
-            $log.debug('Get students for parent');
+            $log.debug('Get students missing assignments');
 
             var data = {
                 studentid: $mmSite.currentStudentIdForParent
             };
+
             var preSets = {
-                //cacheKey: getCommendationCacheKey()
+                cacheKey: getStudentMissingAssignmentsCacheKey()
             };
 
-            // Get unread notifications.
+            if(refresh) {
+                preSets.getFromCache = false;
+            }
+
+            // Get students missing assignments.
             return $mmSite.read('spark_get_student_missingassignments', data, preSets).then(function(response) {
 
                 if (response) {
@@ -91,18 +98,23 @@ angular.module('mm.addons.assignments')
             });
         };
 
-        self.getStudentUpcomingAssignments = function() {
+        self.getStudentUpcomingAssignments = function(refresh) {
 
-            $log.debug('Get students for parent');
+            $log.debug('Get students upcoming assignments');
 
             var data = {
                 studentid: $mmSite.currentStudentIdForParent
             };
+
             var preSets = {
-                //cacheKey: getCommendationCacheKey()
+                cacheKey: getStudentUpcomingAssignmentsCacheKey()
             };
 
-            // Get unread notifications.
+            if(refresh) {
+                preSets.getFromCache = false;
+            }
+
+            // Get students upcoming assignments.
             return $mmSite.read('spark_get_student_upcomingassignments', data, preSets).then(function(response) {
 
                 if (response) {
@@ -119,18 +131,23 @@ angular.module('mm.addons.assignments')
             });
         };
 
-        self.getStudentBelowGradesAssignments = function() {
+        self.getStudentBelowGradesAssignments = function(refresh) {
 
-            $log.debug('Get students for parent');
+            $log.debug('Get students below grades assignments');
 
             var data = {
                 studentid: $mmSite.currentStudentIdForParent
             };
+
             var preSets = {
-                //cacheKey: getCommendationCacheKey()
+                cacheKey: getStudentBelowGradesAssignmentsCacheKey()
             };
 
-            // Get unread notifications.
+            if(refresh) {
+                preSets.getFromCache = false;
+            }
+
+            // Get students below grades assignments.
             return $mmSite.read('spark_get_student_belowgradesassignments', data, preSets).then(function(response) {
 
                 if (response) {
@@ -144,6 +161,51 @@ angular.module('mm.addons.assignments')
                 } else {
                     return $q.reject();
                 }
+            });
+        };
+
+        /**
+         * Invalidates Student Missing Assignments WS call.
+         *
+         * @module mm.addons.assignments
+         * @ngdoc method
+         * @name $mmaAssignments#invalidateStudentMissingAssignments
+         * @param {String} [siteid] Site ID to invalidate. If not defined, use current site.
+         * @return {Promise}        Promise resolved when the data is invalidated.
+         */
+        self.invalidateStudentMissingAssignments = function(siteid) {
+            return $mmSitesManager.getSite(siteid).then(function(site) {
+                return site.invalidateWsCacheForKey(getStudentMissingAssignmentsCacheKey());
+            });
+        };
+
+        /**
+         * Invalidates Student Upcoming Assignments WS call.
+         *
+         * @module mm.addons.assignments
+         * @ngdoc method
+         * @name $mmaAssignments#invalidateStudentUpcomingAssignments
+         * @param {String} [siteid] Site ID to invalidate. If not defined, use current site.
+         * @return {Promise}        Promise resolved when the data is invalidated.
+         */
+        self.invalidateStudentUpcomingAssignments = function(siteid) {
+            return $mmSitesManager.getSite(siteid).then(function(site) {
+                return site.invalidateWsCacheForKey(getStudentUpcomingAssignmentsCacheKey());
+            });
+        };
+
+        /**
+         * Invalidates Student Below Grades Assignments WS call.
+         *
+         * @module mm.addons.assignments
+         * @ngdoc method
+         * @name $mmaAssignments#invalidateStudentBelowGradesAssignments
+         * @param {String} [siteid] Site ID to invalidate. If not defined, use current site.
+         * @return {Promise}        Promise resolved when the data is invalidated.
+         */
+        self.invalidateStudentBelowGradesAssignments = function(siteid) {
+            return $mmSitesManager.getSite(siteid).then(function(site) {
+                return site.invalidateWsCacheForKey(getStudentBelowGradesAssignmentsCacheKey());
             });
         };
 
