@@ -19,56 +19,92 @@ angular.module('mm.addons.mystudents')
 /**
  * Service to handle notifications (messages).
  *
- * @module mm.addons.commendation
+ * @module mm.addons.mystudents
  * @ngdoc service
- * @name $mmaCommendation
+ * @name $mmaMyStudents
  */
-    .factory('$mmaMyStudents', function($q, $log, $mmSite) {
+    .factory('$mmaMyStudents', function($q, $log, $mmSite, $mmSitesManager, $mmUser) {
 
         $log = $log.getInstance('$mmaMyStudents');
 
         var self = {};
 
         /**
-         * Get cache key for notification list WS calls.
+         * Get students for parent from site.
          *
-         * @return {String} Cache key.
-         */
-        function getCommendationCacheKey() {
-            return 'mmaCommendation:list';
-        };
-
-        /**
-         * Get commendation from site.
-         *
-         * @module mm.addons.notifications
+         * @module mm.addons.mystudents
          * @ngdoc method
-         * @name $mmaNotifications#getNotifications
-         * @param {Boolean} read       True if should get read notifications, false otherwise.
-         * @param {Number} limitFrom   Position of the first notification to get.
-         * @param {Number} limitNumber Number of notifications to get.
+         * @name $mmaMyStudents#getMyStudents
+         * @param {Boolean} [refresh] True when we should not get the value from the cache.
          * @return {Promise}           Promise resolved with notifications.
          */
-        self.getMyStudents = function() {
+        self.getMyStudents = function(refresh) {
 
             $log.debug('Get students for parent');
 
             var data = {
                 userid: $mmSite.getUserId()
-                //studentid: studentid
             };
+
             var preSets = {
-                //cacheKey: getCommendationCacheKey()
+                cacheKey: getMyStudentsCacheKey()
             };
+
+            if(refresh) {
+                preSets.getFromCache = false;
+            }
 
             // Get unread notifications.
             return $mmSite.read('spark_dashboard_get_students', data, preSets).then(function(response) {
 
                 if (response.students) {
-                    var students = response.students;
-                    return students;
+                    angular.forEach(response.students, self.formatMyStudentData);
+                    return response.students;
                 } else {
                     return $q.reject();
+                }
+            });
+        };
+
+        /**
+         * Get cache key for get my students WS call.
+         *
+         * @return {String}       Cache key.
+         */
+        function getMyStudentsCacheKey() {
+            return 'mmaMyStudents:mystudents';
+        }
+
+        /**
+         * Invalidates my students WS call.
+         *
+         * @module mm.addons.mystudents
+         * @ngdoc method
+         * @name $mmaMyStudents#invalidateMyStudents
+         * @param {String} [siteid] Site ID to invalidate. If not defined, use current site.
+         * @return {Promise}        Promise resolved when the data is invalidated.
+         */
+        self.invalidateMyStudents = function(siteid) {
+            return $mmSitesManager.getSite(siteid).then(function(site) {
+                return site.invalidateWsCacheForKey(getMyStudentsCacheKey());
+            });
+        };
+
+        /**
+         * Convenience function to format some student data to be rendered. Adds property student profile image
+         *
+         * @module mm.addons.mystudents
+         * @ngdoc method
+         * @name $mmaMyStudents#formatMyStudentData
+         * @param {Object} e Student to format.
+         */
+        self.formatMyStudentData = function(e) {
+            return $mmUser.getUserFromWS(e.id).then(function (student) {
+                if (student.profileimageurl) {
+                    e.profileimage = student.profileimageurl;
+                }
+                else {
+                    e.profileimage = 'img/user-avatar.png';
                 }
             });
         };

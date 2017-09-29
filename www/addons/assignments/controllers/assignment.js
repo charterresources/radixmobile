@@ -15,21 +15,22 @@
 angular.module('mm.addons.assignments')
 
 /**
- * Controller to handle an event.
+ * Controller to handle an assignment.
  *
- * @module mm.addons.calendar
+ * @module mm.addons.assignments
  * @ngdoc controller
- * @name mmaCalendarEventCtrl
+ * @name mmaAssignmentCtrl
  */
-    .controller('mmaAssignmentCtrl', function($scope, $log, $stateParams, $mmaAssignments, $mmUser, $mmSite, $translate, $sce) {
+    .controller('mmaAssignmentCtrl', function($scope, $log, $stateParams, $mmaAssignments, $mmUser,
+                                              $mmSite, $translate, $sce, $q, $ionicScrollDelegate, $mmUtil) {
 
         $log = $log.getInstance('mmaAssignmentCtrl');
 
+        var scrollView = $ionicScrollDelegate.$getByHandle('mmaAssignmentScroll');
         $scope.eventToLoad = 1;
         $scope.eventsLoaded = true;
         $scope.eventLoaded = true;
         $scope.coursename = null;
-        // $scope.duedate = null;
         $scope.dategraded = null;
         $scope.grademax = null;
         $scope.title = null;
@@ -40,80 +41,115 @@ angular.module('mm.addons.assignments')
         $scope.assignmenttype = null;
         $scope.description = null;
 
-        function getAssignment() {
+        // Convenience function that fetches the assignment and updates the scope.
+        function fetchAssignment(refresh) {
+            return $mmUser.getUserFromWS($mmSite.currentStudentIdForParent).then(function (student) {
+                $scope.studentfullname = student.fullname;
+
+                switch ($stateParams.type) {
+                    case 'missing':
+                        return $mmaAssignments.getStudentMissingAssignments(refresh).then(function(e) {
+                            for (var i = 0; i < e.length; i++) {
+                                for (var j = 0; j < e[i].missingassignments.length; j++) {
+                                    if($stateParams.id == e[i].missingassignments[j].coursemoduleid) {
+                                        $scope.coursename = e[i].coursename;
+                                        $scope.duedate = e[i].missingassignments[j].duedate;
+                                        $scope.dategraded = e[i].missingassignments[j].dategraded;
+                                        $scope.grademax = e[i].missingassignments[j].grademax;
+                                        $scope.title = e[i].missingassignments[j].title;
+                                        $scope.itemmodule = e[i].missingassignments[j].itemmodule;
+                                        $scope.feedback = e[i].missingassignments[j].feedback;
+                                        $scope.icon = e[i].missingassignments[j].icon;
+                                        $scope.assignmenttype = $translate.instant('mma.assignments.missingassignment');
+                                        $scope.description = $sce.trustAsHtml(e[i].missingassignments[j].description);
+                                        break;
+                                    }
+                                }
+                            }
+                        }, function(error) {
+                            $mmUtil.showErrorModalDefault(error, 'mma.assignments.errorloadassignment', true);
+                        });
+                        break;
+                    case 'upcoming':
+                        return $mmaAssignments.getStudentUpcomingAssignments(refresh).then(function(e) {
+                            for (var i = 0; i < e.length; i++) {
+                                for (var j = 0; j < e[i].upcomingassignments.length; j++) {
+                                    if($stateParams.id == e[i].upcomingassignments[j].coursemoduleid) {
+                                        $scope.coursename = e[i].coursename;
+                                        $scope.duedate = e[i].upcomingassignments[j].duedate;
+                                        $scope.dategraded = e[i].upcomingassignments[j].dategraded;
+                                        $scope.grademax = e[i].upcomingassignments[j].grademax;
+                                        $scope.title = e[i].upcomingassignments[j].title;
+                                        $scope.itemmodule = e[i].upcomingassignments[j].itemmodule;
+                                        $scope.feedback = e[i].upcomingassignments[j].feedback;
+                                        $scope.icon = e[i].upcomingassignments[j].icon;
+                                        $scope.assignmenttype = $translate.instant('mma.assignments.upcomingassignment');
+                                        $scope.description = $sce.trustAsHtml(e[i].upcomingassignments[j].description);
+                                        break;
+                                    }
+                                }
+                            }
+                        }, function(error) {
+                            $mmUtil.showErrorModalDefault(error, 'mma.assignments.errorloadassignment', true);
+                        });
+                        break;
+                    case 'below':
+                        return $mmaAssignments.getStudentBelowGradesAssignments(refresh).then(function(e) {
+                            for (var i = 0; i < e.length; i++) {
+                                for (var j = 0; j < e[i].belowgrades.length; j++) {
+                                    if($stateParams.id == e[i].belowgrades[j].coursemoduleid) {
+                                        $scope.coursename = e[i].coursename;
+                                        $scope.dategraded = e[i].belowgrades[j].dategraded;
+                                        $scope.grademax = e[i].belowgrades[j].grademax;
+                                        $scope.title = e[i].belowgrades[j].title;
+                                        $scope.itemmodule = e[i].belowgrades[j].itemmodule;
+                                        $scope.feedback = e[i].belowgrades[j].feedback;
+                                        $scope.icon = e[i].belowgrades[j].icon;
+                                        $scope.assignmenttype = $translate.instant('mma.assignments.lowgradeassignment');
+                                        $scope.description = $sce.trustAsHtml(e[i].belowgrades[j].description);
+                                        break;
+                                    }
+                                }
+                            }
+                        }, function(error) {
+                            $mmUtil.showErrorModalDefault(error, 'mma.assignments.errorloadassignment', true);
+                        });
+                        break;
+                    default:
+                }
+            }, function(error) {
+                $mmUtil.showErrorModalDefault(error, 'mma.assignments.errorloadassignment', true);
+            }).finally(function () {
+                // Resize the scroll view so infinite loading is able to calculate if it should load more items or not.
+                scrollView.resize();
+            });
+        };
+
+        // Pull to refresh.
+        $scope.refreshAssignment = function() {
+            var promises = [];
             switch ($stateParams.type) {
                 case 'missing':
-                    $mmaAssignments.getStudentMissingAssignments().then(function(e) {
-                        for (var i = 0; i < e.length; i++) {
-                            for (var j = 0; j < e[i].missingassignments.length; j++) {
-                                if($stateParams.id == e[i].missingassignments[j].coursemoduleid) {
-                                    $scope.coursename = e[i].coursename;
-                                    $scope.duedate = e[i].missingassignments[j].duedate;
-                                    $scope.dategraded = e[i].missingassignments[j].dategraded;
-                                    $scope.grademax = e[i].missingassignments[j].grademax;
-                                    $scope.title = e[i].missingassignments[j].title;
-                                    $scope.itemmodule = e[i].missingassignments[j].itemmodule;
-                                    $scope.feedback = e[i].missingassignments[j].feedback;
-                                    $scope.icon = e[i].missingassignments[j].icon;
-                                    $scope.assignmenttype = $translate.instant('mma.assignments.missing');
-                                    $scope.description = $sce.trustAsHtml(e[i].missingassignments[j].description);
-                                    break;
-                                }
-                            }
-                        }
-                    });
+                    promises.push($mmaAssignments.invalidateStudentMissingAssignments());
                     break;
                 case 'upcoming':
-                    $mmaAssignments.getStudentUpcomingAssignments().then(function(e) {
-                        for (var i = 0; i < e.length; i++) {
-                            for (var j = 0; j < e[i].upcomingassignments.length; j++) {
-                                if($stateParams.id == e[i].upcomingassignments[j].coursemoduleid) {
-                                    $scope.coursename = e[i].coursename;
-                                    $scope.duedate = e[i].upcomingassignments[j].duedate;
-                                    $scope.dategraded = e[i].upcomingassignments[j].dategraded;
-                                    $scope.grademax = e[i].upcomingassignments[j].grademax;
-                                    $scope.title = e[i].upcomingassignments[j].title;
-                                    $scope.itemmodule = e[i].upcomingassignments[j].itemmodule;
-                                    $scope.feedback = e[i].upcomingassignments[j].feedback;
-                                    $scope.icon = e[i].upcomingassignments[j].icon;
-                                    $scope.assignmenttype = $translate.instant('mma.assignments.upcoming');
-                                    $scope.description = $sce.trustAsHtml(e[i].upcomingassignments[j].description);
-                                    break;
-                                }
-                            }
-                        }
-                    });
+                    promises.push($mmaAssignments.invalidateStudentUpcomingAssignments());
                     break;
                 case 'below':
-                    $mmaAssignments.getStudentBelowGradesAssignments().then(function(e) {
-                        for (var i = 0; i < e.length; i++) {
-                            for (var j = 0; j < e[i].belowgrades.length; j++) {
-                                if($stateParams.id == e[i].belowgrades[j].coursemoduleid) {
-                                    $scope.coursename = e[i].coursename;
-                                    $scope.dategraded = e[i].belowgrades[j].dategraded;
-                                    $scope.grademax = e[i].belowgrades[j].grademax;
-                                    $scope.title = e[i].belowgrades[j].title;
-                                    $scope.itemmodule = e[i].belowgrades[j].itemmodule;
-                                    $scope.feedback = e[i].belowgrades[j].feedback;
-                                    $scope.icon = e[i].belowgrades[j].icon;
-                                    $scope.assignmenttype = $translate.instant('mma.assignments.lowgrade');
-                                    $scope.description = $sce.trustAsHtml(e[i].belowgrades[j].description);
-                                    break;
-                                }
-                            }
-                        }
-                    });
+                    promises.push($mmaAssignments.invalidateStudentBelowGradesAssignments());
                     break;
                 default:
             }
-        }
 
-        function setUpStudentInfo() {
-            $mmUser.getUserFromWS($mmSite.currentStudentIdForParent).then(function (student) {
-                $scope.studentfullname = student.fullname;
-            })
+            return $q.all(promises).finally(function() {
+                return fetchAssignment(true);
+            });
         };
 
-        setUpStudentInfo();
-        getAssignment();
+        // Get first assignment.
+        fetchAssignment().then(function() {
+            $scope.assignmentLoaded = true;
+        }).finally(function() {
+            $scope.$broadcast('scroll.infiniteScrollComplete');
+        });
     });
