@@ -1,16 +1,16 @@
 <ion-view>
     <ion-nav-title><mm-format-text watch="true">{{title}}</mm-format-text></ion-nav-title>
-    <ion-content mm-state-class>
+    <ion-content mm-state-class delegate-handle="mmaAssignmentScroll">
         <!-- ion-refresher needs to be direct child of ion-content to work with native scrolling -->
-        <ion-refresher pulling-text="{{ 'mm.core.pulltorefresh' | translate }}" ng-if="eventLoaded"
-                       on-refresh="refreshEvent()">
+        <ion-refresher pulling-text="{{ 'mm.core.pulltorefresh' | translate }}" ng-if="assignmentLoaded"
+                       on-refresh="refreshAssignment()">
         </ion-refresher>
-        <mm-loading hide-until="eventLoaded">
+        <mm-loading hide-until="assignmentLoaded">
             <article>
                 <ul class="list card">
                     <li class="item item-media item-text-wrap" ng-if="title">
-                        <img ng-src="{{icon}}">
-                        <h3><mm-format-text watch="true">{{ 'mma.assignments.assignmenttype' | translate}}: {{assignmenttype}}</mm-format-text></h3>
+                        <img style="margin-top: 10px;" ng-src="{{icon}}">
+                        <h3 style="text-decoration: underline;"><mm-format-text watch="true">{{ 'mm.core.view' | translate}}: {{assignmenttype}}</mm-format-text></h3>
                         <h2><mm-format-text watch="true">{{title}}</mm-format-text></h2>
                     </li>
                     <li class="item item-text-wrap" ng-if="description">

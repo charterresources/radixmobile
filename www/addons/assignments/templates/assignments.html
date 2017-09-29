@@ -1,6 +1,6 @@
 
 <ion-view view-title="{{ 'mma.assignments.assignments' | translate }}">
-    <mm-split-view load-when="eventsLoaded" load="{{eventToLoad}}" component="mmaAssignmentsList" menu-state="site.assignments">
+    <mm-split-view load-when="assignmentsLoaded" load="{{assignmentToLoad}}" component="mmaAssignmentsList" menu-state="site.assignments">
 
         <ion-tabs class="spark tabs-positive tabs-top">
 
@@ -8,9 +8,9 @@
                 <ion-pane>
                     <ion-content class="has-tabs-top" mm-state-class delegate-handle="mmaAssignmentsListScroll">
 
-                        <ion-refresher pulling-text="{{ 'mm.core.pulltorefresh' | translate }}" ng-if="eventsLoaded" on-refresh="refreshEvents()">
+                        <ion-refresher pulling-text="{{ 'mm.core.pulltorefresh' | translate }}" ng-if="assignmentsLoaded" on-refresh="refreshAssignments()">
                         </ion-refresher>
-                        <mm-loading hide-until="eventsLoaded">
+                        <mm-loading hide-until="assignmentsLoaded">
 
                             <div class="list">
                                 <section ng-repeat="missing in missingassignments" class="list card">
@@ -39,9 +39,9 @@
                 <ion-pane>
                     <ion-content class="has-tabs-top" mm-state-class delegate-handle="mmaAssignmentsListScroll">
 
-                        <ion-refresher pulling-text="{{ 'mm.core.pulltorefresh' | translate }}" ng-if="eventsLoaded" on-refresh="refreshEvents()">
+                        <ion-refresher pulling-text="{{ 'mm.core.pulltorefresh' | translate }}" ng-if="assignmentsLoaded" on-refresh="refreshAssignments()">
                         </ion-refresher>
-                        <mm-loading hide-until="eventsLoaded">
+                        <mm-loading hide-until="assignmentsLoaded">
 
                             <div class="list">
                                 <section ng-repeat="upcoming in upcomingassignments" class="list card">
@@ -69,9 +69,9 @@
                 <ion-pane>
                     <ion-content class="has-tabs-top" mm-state-class delegate-handle="mmaAssignmentsListScroll">
 
-                        <ion-refresher pulling-text="{{ 'mm.core.pulltorefresh' | translate }}" ng-if="eventsLoaded" on-refresh="refreshEvents()">
+                        <ion-refresher pulling-text="{{ 'mm.core.pulltorefresh' | translate }}" ng-if="assignmentsLoaded" on-refresh="refreshAssignments()">
                         </ion-refresher>
-                        <mm-loading hide-until="eventsLoaded">
+                        <mm-loading hide-until="assignmentsLoaded">
 
                             <div class="list">
                                 <section ng-repeat="grades in belowgradesassignments" class="list card">
@@ -107,25 +107,3 @@
         </div>
     </ion-footer-bar>
 </ion-view>
-
-
-
-
-<!--<ion-content class="has-tabs-top" mm-state-class delegate-handle="mmaAssignmentsListScroll">-->
-
-<!--<ion-refresher pulling-text="{{ 'mm.core.pulltorefresh' | translate }}" ng-if="eventsLoaded" on-refresh="refreshEvents()">-->
-<!--</ion-refresher>-->
-<!--<mm-loading hide-until="eventsLoaded">-->
-
-<!--<h1>{{currentStudent.firstname}} {{currentStudent.lastname }}</h1>-->
-
-<!--<ul class="list">-->
-<!--<li ng-repeat="student in students">-->
-<!--<a class="item item-media item-text-wrap" mm-split-view-link="site.assignments-student({id: student.id})" title="{{student.firstname}} {{student.lastname }}">-->
-<!--<img ng-src="http://lorempixel.com/30/30/">-->
-<!--<h2><mm-format-text watch="true">{{student.firstname}}</mm-format-text></h2>-->
-<!--</a>-->
-<!--</li>-->
-<!--</ul>-->
-<!--</mm-loading>-->
-<!--</ion-content>-->

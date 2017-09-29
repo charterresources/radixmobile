@@ -1,9 +1,12 @@
 {
   "mystudents": "My students",
   "missing": "Missing",
+  "missingassignment": "Missing assignment",
   "upcoming": "Upcoming",
+  "upcomingassignment": "Upcoming assignment",
   "below70": "Below 70%",
   "lowgrade": "Low grade",
+  "lowgradeassignment": "Low grade assignment",
   "assignments": "Assignments",
   "assignment": "Assignment",
   "duedate": "Due date",
@@ -12,5 +15,7 @@
   "title": "Title",
   "feedback": "Feedback",
   "assignmenttype": "Assignment type",
-  "description": "Description"
+  "description": "Description",
+  "errorloadassignments": "Failed to load assignments",
+  "errorloadassignment": "Failed to load assignment"
 }

@@ -1,12 +1,14 @@
 <ion-view view-title="{{ 'mma.mystudents.mystudents' | translate }}">
     <ion-content mm-state-class delegate-handle="mmaMyStudentsListScroll">
-        <ion-refresher pulling-text="{{ 'mm.core.pulltorefresh' | translate }}"">
+        <ion-refresher pulling-text="{{ 'mm.core.pulltorefresh' | translate }}" ng-if="studentsLoaded"
+                       on-refresh="refreshStudents()">
         </ion-refresher>
         <mm-loading hide-until="studentsLoaded">
             <div class="list">
                 <section ng-repeat="student in students" class="list card" ng-click="onStudentSelected(student.id)">
                     <div class="item item-avatar spark">
-                        <img src="img/user-avatar.png">
+                        <!--<img ng-if="!profileimage" ng-src="img/user-avatar.png">-->
+                        <img ng-src="{{student.profileimage}}">
                         <p style="font-size:20px;">{{student.firstname}} {{student.lastname }}</p>
                     </div>
                     <div class="row">

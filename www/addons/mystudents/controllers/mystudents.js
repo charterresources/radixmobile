@@ -21,31 +21,53 @@ angular.module('mm.addons.mystudents')
  * @ngdoc controller
  * @name mmaCalendarListCtrl
  */
-    .controller('mmaMyStudentsListCtrl', function($scope, $ionicTabsDelegate, $stateParams, $log,$mmaMyStudents, $state, $mmaCalendar, $mmUtil, $timeout, $mmEvents,
-                                                  mmaCalendarDaysInterval, $ionicScrollDelegate, $mmLocalNotifications, $mmCourses, mmaCalendarDefaultNotifTimeChangedEvent,
-                                                  $ionicPopover, $q, $translate, $ionicPlatform) {
+    .controller('mmaMyStudentsListCtrl', function($scope, $ionicTabsDelegate, $stateParams, $log, $mmaMyStudents,
+                                                  $state, $q, $ionicScrollDelegate, $mmUtil, $mmSite, $mmUser) {
 
         $log = $log.getInstance('mmaMyStudentsListCtrl');
+
+        var scrollView = $ionicScrollDelegate.$getByHandle('mmaMyStudentsListScroll');
         $scope.students = [];
 
-        $mmaMyStudents.getMyStudents().then(function(students) {
-            $scope.students = students;
-        }).finally(function() {
-            $scope.studentsLoaded = true;
-        });
+        // Convenience function that fetches the students and updates the scope.
+        function fetchStudents(refresh) {
+            return $mmaMyStudents.getMyStudents(refresh).then(function(students) {
 
-        $scope.selectTabWithIndex = function(index) {
-            $ionicTabsDelegate.select(index);
-            console.log(index);
-        };
-        $scope.clicker=function(){
-            console.log('clicked');
-            alert('clicked');
-        };
+                if (refresh) {
+                    $scope.students = students;
+                } else {
+                    // Filter events with same ID. Repeated events are returned once per WS call, show them only once.
+                    $scope.students = $mmUtil.mergeArraysWithoutDuplicates($scope.students, students, 'id');
+                }
 
-        $scope.onStudentSelected=function(studentId){
+                // Resize the scroll view so infinite loading is able to calculate if it should load more items or not.
+                scrollView.resize();
+            }, function(error) {
+                $mmUtil.showErrorModalDefault(error, 'mma.mystudents.errorloadmystudents', true);
+            });
+        }
+
+        $scope.onStudentSelected = function(studentId){
             if(studentId) {
+                $mmSite.setCurrentStudentId(studentId);
                 $state.go('site.assignments', {sid: studentId});
             }
         };
+
+        // Pull to refresh.
+        $scope.refreshStudents = function() {
+            var promises = [];
+            promises.push($mmaMyStudents.invalidateMyStudents());
+
+            return $q.all(promises).finally(function() {
+                return fetchStudents(true);
+            });
+        };
+
+        // Get first students.
+        fetchStudents().then(function() {
+            $scope.studentsLoaded = true;
+        }).finally(function() {
+            $scope.$broadcast('scroll.infiniteScrollComplete');
+        });
     });
