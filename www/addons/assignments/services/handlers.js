@@ -47,10 +47,7 @@ angular.module('mm.addons.assignments')
              * @return {Boolean} True if handler is enabled, false otherwise.
              */
             self.isEnabled = function() {
-                if($mmSite.getInfo().isparentuser || $mmSite.getInfo().isstudentuser) {
-                    return true;
-                }
-                return false;
+                return $mmSite.getInfo().isparentuser || $mmSite.getInfo().isstudentuser;
             };
 
             /**

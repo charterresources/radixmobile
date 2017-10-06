@@ -6,7 +6,7 @@
 
             <ion-tab title="{{ 'mma.assignments.missing' | translate}}" badge="currentStudent.numofmissingassignmnets">
                 <ion-pane>
-                    <ion-content class="has-tabs-top" mm-state-class delegate-handle="mmaAssignmentsListScroll">
+                    <ion-content class="has-tabs-top has-footer" mm-state-class delegate-handle="mmaAssignmentsListScroll">
 
                         <ion-refresher pulling-text="{{ 'mm.core.pulltorefresh' | translate }}" ng-if="assignmentsLoaded" on-refresh="refreshAssignments()">
                         </ion-refresher>
@@ -34,10 +34,9 @@
                     </ion-content>
                 </ion-pane>
             </ion-tab>
-
             <ion-tab title="{{ 'mma.assignments.upcoming' | translate}}" badge="currentStudent.numofupcomingassignments">
                 <ion-pane>
-                    <ion-content class="has-tabs-top" mm-state-class delegate-handle="mmaAssignmentsListScroll">
+                    <ion-content class="has-tabs-top  has-footer" mm-state-class delegate-handle="mmaAssignmentsListScroll">
 
                         <ion-refresher pulling-text="{{ 'mm.core.pulltorefresh' | translate }}" ng-if="assignmentsLoaded" on-refresh="refreshAssignments()">
                         </ion-refresher>
@@ -67,7 +66,7 @@
             </ion-tab>
             <ion-tab title="{{ 'mma.assignments.lowgrade' | translate}}" badge="currentStudent.numofbelowassignmnets">
                 <ion-pane>
-                    <ion-content class="has-tabs-top" mm-state-class delegate-handle="mmaAssignmentsListScroll">
+                    <ion-content class="has-tabs-top has-footer" mm-state-class delegate-handle="mmaAssignmentsListScroll">
 
                         <ion-refresher pulling-text="{{ 'mm.core.pulltorefresh' | translate }}" ng-if="assignmentsLoaded" on-refresh="refreshAssignments()">
                         </ion-refresher>
@@ -97,7 +96,6 @@
             </ion-tab>
 
         </ion-tabs>
-
 
     </mm-split-view>
     <ion-footer-bar ng-if="isparentuser" style="padding-top:5px;border-style:none" class="bar-stable tabs">

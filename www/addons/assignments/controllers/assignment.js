@@ -27,9 +27,6 @@ angular.module('mm.addons.assignments')
         $log = $log.getInstance('mmaAssignmentCtrl');
 
         var scrollView = $ionicScrollDelegate.$getByHandle('mmaAssignmentScroll');
-        $scope.eventToLoad = 1;
-        $scope.eventsLoaded = true;
-        $scope.eventLoaded = true;
         $scope.coursename = null;
         $scope.dategraded = null;
         $scope.grademax = null;
