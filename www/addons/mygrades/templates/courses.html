@@ -1,0 +1,70 @@
+<ion-view view-title="{{ 'mm.grades.grades' | translate }}">
+    <ion-content class="has-footer" mm-state-class delegate-handle="mmaMyGradesCoursesGradesListScroll">
+
+        <ion-refresher pulling-text="{{ 'mm.core.pulltorefresh' | translate }}" ng-if="mygradescoursesgradesToLoaded" on-refresh="refreshMyGradesCoursesGrades()">
+        </ion-refresher>
+        <mm-loading hide-until="mygradescoursesgradesToLoaded">
+            <article ng-repeat="grade in mygradescoursesgrades">
+                <ul class="list card" style="margin-bottom: 20px;">
+                    <li style="margin-bottom: -10px;">
+                        <a class="item item-text-wrap item-icon-right item-borderless item-course" ng-class="{'item-progress': grade.roundProgress}" ui-sref="site.mycoursesgrades-quarter({sid: currentStudent.id, cid: grade.id})" title="{{course.fullname}}">
+                            <div class="spark progress-chart-container" ng-if="grade.roundProgress">
+                                <div ng-if="grade.progress !== false" class="progress-doughnut">
+                                    <div ng-if="!grade.isscale && grade.isgraded" class="progress-text has-percent">{{grade.progress}}&#37;</div>
+                                    <div ng-if="grade.isscale || !grade.isgraded" class="progress-text has-percent">{{grade.lettergrade}}</div>
+                                    <div class="progress-indicator">
+                                        <svg xmlns="http://www.w3.org/2000/svg">
+                                            <g >
+                                                <title>{{grade.progress}}&#37;</title>
+                                                <circle class="circle {{grade.color}} percent-{{grade.progress}}"   r="27.5" cx="35" cy="35"/>
+                                            </g>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div ng-if="grade.progress === false" class="no-progress">
+                                    <i class="icon ion-ionic"></i>
+                                </div>
+                            </div>
+                            <h2><mm-format-text watch="true">{{grade.coursename}}</mm-format-text></h2>
+
+                            <ion-spinner ng-if="!mygradescoursesgradesToLoaded" class="mm-animate-show-hide"></ion-spinner>
+                            <i class="icon ion-ios-arrow-right"></i>
+                        </a>
+
+                    </li>
+                    <li style="border-top: none;padding-top: 0px;padding-bottom: 0px;" class="item item-text-wrap" ng-if="grade.q1 || grade.q2 || grade.q3 || grade.q4 || grade.s1 || grade.s2 || grade.avg">
+                        <div style="border-top: none" class="item item-text-wrap row row-center">
+                            <p style="margin-bottom: 0px;padding-bottom: 0px;font-weight: bold;text-decoration: underline" class="col text-center" ng-if="grade.q1"><mm-format-text watch="true">{{ 'mma.mygrades.q1' | translate}}</mm-format-text></p>
+                            <p style="margin-bottom: 0px;padding-bottom: 0px;font-weight: bold;text-decoration: underline" class="col text-center" ng-if="grade.q2"><mm-format-text watch="true">{{ 'mma.mygrades.q2' | translate}}</mm-format-text></p>
+                            <p style="margin-bottom: 0px;padding-bottom: 0px;font-weight: bold;text-decoration: underline" class="col text-center" ng-if="grade.s1"><mm-format-text watch="true">{{ 'mma.mygrades.s1' | translate}}</mm-format-text></p>
+                            <p style="margin-bottom: 0px;padding-bottom: 0px;font-weight: bold;text-decoration: underline" class="col text-center" ng-if="grade.q3"><mm-format-text watch="true">{{ 'mma.mygrades.q3' | translate}}</mm-format-text></p>
+                            <p style="margin-bottom: 0px;padding-bottom: 0px;font-weight: bold;text-decoration: underline" class="col text-center" ng-if="grade.q4"><mm-format-text watch="true">{{ 'mma.mygrades.q4' | translate}}</mm-format-text></p>
+                            <p style="margin-bottom: 0px;padding-bottom: 0px;font-weight: bold;text-decoration: underline" class="col text-center" ng-if="grade.s2"><mm-format-text watch="true">{{ 'mma.mygrades.s2' | translate}}</mm-format-text></p>
+                            <p style="margin-bottom: 0px;padding-bottom: 0px;font-weight: bold;text-decoration: underline" class="col text-center" ng-if="grade.avg"><mm-format-text watch="true">{{ 'mma.mygrades.avg' | translate}}</mm-format-text></p>
+                        </div>
+                        <div style="border-top: none" class="item item-text-wrap row row-center">
+                            <p class="col text-center" ng-if="grade.q1"><mm-format-text watch="true">{{ grade.q1 }}</mm-format-text></p>
+                            <p class="col text-center" ng-if="grade.q2"><mm-format-text watch="true">{{ grade.q2 }}</mm-format-text></p>
+                            <p class="col text-center" ng-if="grade.s1"><mm-format-text watch="true">{{ grade.s1 }}</mm-format-text></p>
+                            <p class="col text-center" ng-if="grade.q3"><mm-format-text watch="true">{{ grade.q3 }}</mm-format-text></p>
+                            <p class="col text-center" ng-if="grade.q4"><mm-format-text watch="true">{{ grade.q4 }}</mm-format-text></p>
+                            <p class="col text-center" ng-if="grade.s2"><mm-format-text watch="true">{{ grade.s2 }}</mm-format-text></p>
+                            <p class="col text-center" ng-if="grade.avg"><mm-format-text watch="true">{{ grade.avg }}</mm-format-text></p>
+                        </div>
+                    </li>
+                    <li style="padding-top: 5px;padding-bottom: 5px;" class="item item-text-wrap" ng-if="grade.teachername">
+                        <h3 style="display:inline-block">{{ 'mm.user.editingteacher' | translate}}</h3>
+                        <p style="display:inline-block"><mm-format-text watch="true">{{grade.teachername}}</mm-format-text></p>
+                    </li>
+                </ul>
+            </article>
+            <mm-empty-box ng-if="!mygradescoursesgrades || mygradescoursesgrades.length == 0" icon="ion-stats-bars" message="{{ 'mma.grades.nogradesreturned' | translate }}"></mm-empty-box>
+        </mm-loading>
+    </ion-content>
+    <ion-footer-bar ng-if="isparentuser" style="padding-top:5px;border-style:none" class="bar-stable tabs">
+        <div class="button-bar button-small" >
+            <a class="button" ng-class="{'spark button-active': isCurrent(student.id)}" ng-repeat="student in students" ng-click="setCurrentStudentById(student.id)">
+                {{student.firstname}} {{student.lastname }}</a>
+        </div>
+    </ion-footer-bar>
+</ion-view>
