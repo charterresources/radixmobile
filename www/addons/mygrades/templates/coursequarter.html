@@ -50,7 +50,7 @@
                             <p style="margin-bottom: 0px;padding-bottom: 0px;font-weight: bold;text-decoration: underline" class="col col-75 text-left"><mm-format-text watch="true">{{ 'mma.assignments.assignment' | translate }}</mm-format-text></p>
                             <p style="margin-bottom: 0px;padding-bottom: 0px;font-weight: bold;text-decoration: underline" class="col col-25 text-center"><mm-format-text watch="true">{{ 'mma.assignments.score' | translate }}</mm-format-text></p>
                         </div>
-                        <div style="border-top: none" class="item item-text-wrap row row-center" ng-repeat="assignment in category.assignments" mm-split-view-link="site.assignment-type({type: 'missing',id: assignment.coursemoduleid})">
+                        <div style="border-top: none" class="item item-text-wrap row row-center" ng-repeat="assignment in category.assignments" mm-split-view-link="site.assignment({sid: studentid, gid: assignment.gradeid})">
                             <img ng-src="{{assignment.icon}}" title="{{assignment.title}}" class="col col-10"/>
                             <a class="col col-65"  title="{{assignment.title}}">
                                 <p><mm-format-text watch="true">{{assignment.title}}</mm-format-text></p>

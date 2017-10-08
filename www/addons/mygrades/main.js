@@ -41,6 +41,15 @@ angular.module('mm.addons.mygrades', [])
                         templateUrl: 'addons/mygrades/templates/coursequarter.html'
                     }
                 }
+            })
+            .state('site.assignment', {
+                url: '/assignment/:sid/:gid',
+                views: {
+                    'site': {
+                        controller: 'mmaMyGradesCoursesGradesAssignmentCtrl',
+                        templateUrl: 'addons/mygrades/templates/assignment.html'
+                    }
+                }
             });
 
         // Register side menu addon.

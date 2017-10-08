@@ -39,6 +39,7 @@ angular.module('mm.addons.mygrades')
         $scope.lettergrade = null;
         $scope.progress = null;
         $scope.color = 'red';
+        $scope.studentid = null;
 
         // var sid = parseInt($stateParams.sid);
         // var cid = parseInt($stateParams.cid);
@@ -56,6 +57,7 @@ angular.module('mm.addons.mygrades')
                 $scope.lettergrade = quarter[0].lettergrade;
                 $scope.progress = quarter[0].progress;
                 $scope.color = quarter[0].color;
+                $scope.studentid = $stateParams.sid;
             }, function(error) {
                 $mmUtil.showErrorModalDefault(error, 'mma.mygrades.errorloadquartercoursegrades', true);
             }).finally(function () {
