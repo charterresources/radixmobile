@@ -34,7 +34,7 @@ angular.module('mm.core.courses')
         mmCoursesEventCourseOptionsInvalidated) {
     return {
         restrict: 'E',
-        templateUrl: 'core/components/courses/templates/courselistprogress.html',
+        templateUrl: 'core/components/courses/templates/sparkcourselistprogress.html',
         transclude: true,
         scope: {
             course: '=',
