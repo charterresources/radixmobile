@@ -57,13 +57,11 @@ angular.module('mm.addons.assignments')
             return $mmaMyStudents.getMyStudents().then(function(students) {
                 $scope.students = students;
             }).finally(function() {
-                if($stateParams.sid) {
-                    if($scope.students.length > 0) {
+                if($scope.students.length > 0) {
+                    if($stateParams.sid) {
                         $scope.setCurrentStudentById($stateParams.sid);
                     }
-                }
-                else {
-                    if($scope.students.length > 0) {
+                    else {
                         $scope.setCurrentStudentById($scope.students[0].id);
                     }
                 }
@@ -100,11 +98,12 @@ angular.module('mm.addons.assignments')
             });
         };
 
-        getStudents();
-        // Get first assignments.
-        fetchAssignments().then(function() {
-            $scope.assignmentsLoaded = true;
-        }).finally(function() {
-            $scope.$broadcast('scroll.infiniteScrollComplete');
+        getStudents().then(function () {
+            // Get first assignments.
+            fetchAssignments().then(function() {
+                $scope.assignmentsLoaded = true;
+            }).finally(function() {
+                $scope.$broadcast('scroll.infiniteScrollComplete');
+            });
         });
     });

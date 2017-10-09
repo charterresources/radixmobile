@@ -11,31 +11,29 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//commendation
 
-angular.module('mm.addons.assignments')
+angular.module('mm.addons.mygrades')
 
 /**
- * Assignments handlers factory.
+ * MyGrades handlers factory.
  *
- * This factory holds the different handlers used for delegates.
- *
- * @module mm.addons.assignments
+ * @module mm.addons.mygrades
  * @ngdoc service
- * @name $mmaAssignmentsHandlers
+ * @name $mmaMyGradesHandlers
  */
-    .factory('$mmaAssignmentsHandlers', function($log, $mmSite) {
-
-        $log = $log.getInstance('$mmaAssignmentsHandlers');
+    .factory('$mmaMyGradesHandlers', function($mmSite, $mmGrades, $mmaMyCoursesGrades, $state, $mmContentLinksHelper, $mmContentLinkHandlerFactory,
+                                              mmCoursesAccessMethods, mmUserProfileHandlersTypeNewPage) {
 
         var self = {};
+
+
 
         /**
          * Side menu nav handler.
          *
-         * @module mm.addons.assignments
+         * @module mm.addons.mygrades
          * @ngdoc method
-         * @name $mmaAssignmentsHandlers#sideMenuNav
+         * @name $mmaMyGradesHandlers#sideMenuNav
          */
         self.sideMenuNav = function() {
 
@@ -44,10 +42,11 @@ angular.module('mm.addons.assignments')
             /**
              * Check if handler is enabled.
              *
-             * @return {Boolean} True if handler is enabled, false otherwise.
+             * @return {Promise|Boolean} If handler is enabled(only if parent user) returns a resolved promise. If it's not it can return a
+             *                           rejected promise or false.
              */
             self.isEnabled = function() {
-                return $mmSite.getInfo().isparentuser || $mmSite.getInfo().isstudentuser;
+                return $mmSite.getInfo().isparentuser;
             };
 
             /**
@@ -60,17 +59,17 @@ angular.module('mm.addons.assignments')
                 /**
                  * Side menu nav handler controller.
                  *
-                 * @module mm.addons.assignments
+                 * @module mm.addons.mygrades
                  * @ngdoc controller
-                 * @name $mmaAssignmentsHandlers#sideMenuNav:controller
+                 * @name $mmaMyGradesHandlers#sideMenuNav:controller
                  */
                 return function($scope) {
-                    $scope.icon = 'ion-ios-list';
-                    $scope.title = 'mma.assignments.assignments';
-                    $scope.state = 'site.assignments';
+                    $scope.icon = 'ion-stats-bars';
+                    $scope.title = 'mm.grades.grades';
+                    $scope.state = 'site.mycoursesgrades';
+                    $scope.class = 'mma-grades-coursesgrades';
                 };
             };
-
 
             return self;
         };

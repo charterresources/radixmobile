@@ -1,0 +1,48 @@
+<ion-view>
+    <ion-nav-title><mm-format-text watch="true">{{title}}</mm-format-text></ion-nav-title>
+    <ion-content mm-state-class delegate-handle="mmaMyGradesCoursesGradesAssignmentScroll">
+        <!-- ion-refresher needs to be direct child of ion-content to work with native scrolling -->
+        <ion-refresher pulling-text="{{ 'mm.core.pulltorefresh' | translate }}" ng-if="assignmentLoaded"
+                       on-refresh="refreshAssignment()">
+        </ion-refresher>
+        <mm-loading hide-until="assignmentLoaded">
+            <article>
+                <ul class="list card">
+                    <li class="item item-media item-text-wrap" ng-if="title">
+                        <img ng-src="{{icon}}">
+                        <h2><mm-format-text watch="true">{{title}}</mm-format-text></h2>
+                    </li>
+                    <li class="item item-text-wrap" ng-if="description">
+                        <h3>{{ 'mma.assignments.description' | translate}}</h3>
+                        <!--{{ introduction }}-->
+                        <div data-ng-bind-html="description"></div>
+                    </li>
+                    <li class="item item-text-wrap" ng-if="duedate">
+                        <h3>{{ 'mma.assignments.duedate' | translate}}</h3>
+                        <p>{{ duedate | mmToLocaleString }}</p>
+                    </li>
+                    <li class="item item-text-wrap" ng-if="dategraded">
+                        <h3>{{ 'mma.assignments.dategraded' | translate}}</h3>
+                        <p>{{ dategraded | mmToLocaleString }}</p>
+                    </li>
+                    <li class="item item-text-wrap" ng-if="score">
+                        <h3>{{ 'mma.assignments.score' | translate}}</h3>
+                        <p><mm-format-text watch="true">{{score}}</mm-format-text></p>
+                    </li>
+                    <li class="item item-text-wrap" ng-if="coursename">
+                        <h3>{{ 'mm.core.course' | translate}}</h3>
+                        <p><mm-format-text watch="true">{{coursename}}</mm-format-text></p>
+                    </li>
+                    <li class="item item-text-wrap" ng-if="feedback">
+                        <h3>{{ 'mma.assignments.feedback' | translate}}</h3>
+                        <p><mm-format-text watch="true">{{feedback}}</mm-format-text></p>
+                    </li>
+                    <li class="item item-text-wrap" ng-if="studentfullname">
+                        <h3>{{ 'mma.mystudents.student' | translate}}</h3>
+                        <p><mm-format-text watch="true">{{studentfullname}}</mm-format-text></p>
+                    </li>
+                </ul>
+            </article>
+        </mm-loading>
+    </ion-content>
+</ion-view>

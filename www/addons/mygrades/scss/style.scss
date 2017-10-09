@@ -1,0 +1,14 @@
+@import "scss/spark-mobile.scss";
+
+svg .circle
+  {
+    &.red {
+      stroke: $spark-red !important;
+    };
+    &.green {
+      stroke: $spark-green !important;
+    };
+    &.yellow {
+      stroke: $spark-yellow !important;
+    };
+  }

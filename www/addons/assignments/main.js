@@ -25,15 +25,6 @@ angular.module('mm.addons.assignments', ['mm.core'])
                         templateUrl: 'addons/assignments/templates/assignment.html'
                     }
                 }
-            })
-            .state('site.assignments-student', {
-                url: '/assignments-student/:id', // We need to add ID to the URL to make ng-href work.
-                views: {
-                    'site': {
-                        controller: 'mmaAssignmentsStudentCtrl',
-                        templateUrl: 'addons/assignments/templates/student.html',
-                    }
-                }
             });
 
         // Register side menu addon.
