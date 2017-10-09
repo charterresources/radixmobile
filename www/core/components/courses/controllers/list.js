@@ -22,7 +22,7 @@ angular.module('mm.core.courses')
  * @name mmCoursesListCtrl
  */
 .controller('mmCoursesListCtrl', function($scope, $mmCourses, $mmCoursesDelegate, $mmUtil, $mmEvents, $mmSite, $q,
-            mmCoursesEventMyCoursesUpdated, mmCoreEventSiteUpdated) {
+            mmCoursesEventMyCoursesUpdated, mmCoreEventSiteUpdated, $mmaMyCoursesGradesQuarter) {
 
     var updateSiteObserver,
         myCoursesObserver;
@@ -41,7 +41,14 @@ angular.module('mm.core.courses')
 
             return $mmCourses.getCoursesOptions(courseIds).then(function(options) {
                 angular.forEach(courses, function(course) {
-                    course.progress = isNaN(parseInt(course.progress, 10)) ? false : parseInt(course.progress, 10);
+                    //course.progress = isNaN(parseInt(course.progress, 10)) ? false : parseInt(course.progress, 10);
+                    $mmaMyCoursesGradesQuarter.getMyGradesQuarter(true, $mmSite.getUserId(), course.id).then(function(grade) {
+                        course.isscale = grade[0].isscale;
+                        course.isgraded = grade[0].isgraded;
+                        course.lettergrade = grade[0].lettergrade;
+                        course.progress = grade[0].progress;
+                        course.color = grade[0].color;
+                    });
                     course.navOptions = options.navOptions[course.id];
                     course.admOptions = options.admOptions[course.id];
                 });
