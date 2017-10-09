@@ -1,0 +1,78 @@
+<ion-view view-title="{{ 'mma.mygrades.currentgradingterm' | translate }}">
+    <!--<ion-view view-title="{{ 'mm.grades.grades' | translate }}&nbsp;-&nbsp;{{coursename}}">-->
+    <mm-split-view load-when="courseQuarterLoaded" load="{{courseQuarterToLoad}}" component="mmaMyCoursesGradesQuarter" menu-state="site.mycoursesgrades-quarter">
+
+        <!--<div class="bar bar-subheader bar-positive">-->
+            <!--<h2 class="title">{{quartername}}<span ng-if="quarteraverage">&nbsp;&nbsp;&nbsp;&nbsp;{{ 'mm.grades.average' | translate }}:&nbsp;{{quarteraverage}}&#37;</span></h2>-->
+        <!--</div>-->
+
+        <ion-content  mm-state-class delegate-handle="mmaMyGradesCoursesGradesQuarterScroll">
+
+        <!-- ion-refresher needs to be direct child of ion-content to work with native scrolling -->
+        <ion-refresher pulling-text="{{ 'mm.core.pulltorefresh' | translate }}" ng-if="courseQuarterLoaded"
+                       on-refresh="refreshMyCoursesGradesQuarter()">
+        </ion-refresher>
+
+        <mm-loading hide-until="courseQuarterLoaded">
+            <article>
+                <ul class="list card" style="margin-bottom: 20px;">
+                    <li style="margin-bottom: -10px;">
+                        <a class="item item-text-wrap item-icon-right item-borderless item-course item-progress" title="{{coursename}}">
+                            <div class="spark progress-chart-container">
+                                <div ng-if="progress !== false" class="progress-doughnut">
+                                    <div ng-if="!isscale && isgraded" class="progress-text has-percent">{{progress}}&#37;</div>
+                                    <div ng-if="isscale || !isgraded" class="progress-text has-percent">{{lettergrade}}</div>
+                                    <div class="progress-indicator">
+                                        <svg xmlns="http://www.w3.org/2000/svg">
+                                            <g >
+                                                <title>{{progress}}&#37;</title>
+                                                <circle class="circle {{color}} percent-{{progress}}"   r="27.5" cx="35" cy="35"/>
+                                            </g>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                            <h2><mm-format-text watch="true">{{coursename}}</mm-format-text></h2>
+                            <h3 style="padding-top: 10px;"><mm-format-text watch="true">{{quartername}}</mm-format-text></h3>
+                        </a>
+                    </li>
+                </ul>
+            </article>
+
+            <article ng-repeat="category in categories">
+                <ul class="list card" style="margin-bottom: 20px;">
+                    <li class="item item-text-wrap" style="margin-bottom: -10px;">
+                        <h2 style="margin-bottom: 3px; font-weight: bold;"><mm-format-text watch="true">{{category.type}}</mm-format-text></h2>
+                        <p><mm-format-text watch="true">( {{ 'mma.mygrades.categoryweight' | translate }} = {{category.weight}}&#37; )</mm-format-text></p>
+                    </li>
+                    <li style="border-top: none;padding-top: 0px;padding-bottom: 0px;" class="item item-text-wrap" ng-if="category.assignments.length>0">
+                        <div style="border-top: none" class="item item-text-wrap row row-center">
+                            <p style="margin-bottom: 0px;padding-bottom: 0px;font-weight: bold;text-decoration: underline" class="col col-75 text-left"><mm-format-text watch="true">{{ 'mma.assignments.assignment' | translate }}</mm-format-text></p>
+                            <p style="margin-bottom: 0px;padding-bottom: 0px;font-weight: bold;text-decoration: underline" class="col col-25 text-center"><mm-format-text watch="true">{{ 'mma.assignments.score' | translate }}</mm-format-text></p>
+                        </div>
+                        <div style="border-top: none" class="item item-text-wrap row row-center" ng-repeat="assignment in category.assignments" mm-split-view-link="site.assignment({sid: studentid, gid: assignment.gradeid})">
+                            <img ng-src="{{assignment.icon}}" title="{{assignment.title}}" class="col col-10"/>
+                            <a class="col col-65"  title="{{assignment.title}}">
+                                <p><mm-format-text watch="true">{{assignment.title}}</mm-format-text></p>
+                            </a>
+                            <a class="col col-25 text-center"  title="{{assignment.score}}">
+                                <p><mm-format-text watch="true">{{assignment.score}}</mm-format-text></p>
+                            </a>
+                        </div>
+                        <div style="border-top: none" class="item row row-right">
+                            <p style="font-weight: bold;" class="col col-offset-34 text-left"><mm-format-text watch="true">{{ 'mm.grades.average' | translate }}: {{category.average}} / {{category.max}}</mm-format-text></p>
+                        </div>
+                    </li>
+                    <li style="border-top: none;padding-top: 0px;padding-bottom: 0px;" class="item item-text-wrap" ng-if="category.assignments.length==0">
+                        <div style="border-top: none" class="item row row-right">
+                            <p style="font-weight: bold;" class="col text-center"><mm-format-text watch="true">{{ 'mma.mygrades.nogradedassignmentsincategory' | translate }}</mm-format-text></p>
+                        </div>
+                    </li>
+                </ul>
+            </article>
+
+            <mm-empty-box ng-if="!categories || categories.length==0" icon="ion-stats-bars" message="{{ 'mma.grades.nogradesreturned' | translate }}"></mm-empty-box>
+        </mm-loading>
+    </ion-content>
+    </mm-split-view>
+</ion-view>

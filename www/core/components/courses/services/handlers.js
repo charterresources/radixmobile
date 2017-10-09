@@ -296,6 +296,10 @@ angular.module('mm.core.courses')
          *                           rejected promise or false.
          */
         self.isEnabled = function() {
+            //Check if user is parent user, so don't register my courses component.
+            if($mmSite.getInfo().isparentuser) {
+                return false;
+            }
             var myCoursesDisabled = $mmCourses.isMyCoursesDisabledInSite();
 
             // Check if overview side menu is available, so it won't show My courses.

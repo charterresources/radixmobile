@@ -17,5 +17,6 @@
   "assignmenttype": "Assignment type",
   "description": "Description",
   "errorloadassignments": "Failed to load assignments",
-  "errorloadassignment": "Failed to load assignment"
+  "errorloadassignment": "Failed to load assignment",
+  "score": "Score"
 }
