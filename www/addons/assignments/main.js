@@ -1,6 +1,6 @@
 angular.module('mm.addons.assignments', ['mm.core'])
 
-    .constant('mmaAssignmentsPriority', 1000)
+    .constant('mmaAssignmentsPriority', 960)
 
     .config(function($stateProvider, $mmSideMenuDelegateProvider, mmaAssignmentsPriority) {
 
