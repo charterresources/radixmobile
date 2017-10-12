@@ -10,8 +10,7 @@
                         <a class="item item-text-wrap item-icon-right item-borderless item-course" ng-class="{'item-progress': grade.roundProgress}" ui-sref="site.mycoursesgrades-quarter({sid: currentStudent.id, cid: grade.id})" title="{{course.fullname}}">
                             <div class="spark progress-chart-container" ng-if="grade.roundProgress">
                                 <div ng-if="grade.progress !== false" class="progress-doughnut">
-                                    <div ng-if="!grade.isscale && grade.isgraded" class="progress-text has-percent">{{grade.progress}}&#37;</div>
-                                    <div ng-if="grade.isscale || !grade.isgraded" class="progress-text has-percent">{{grade.lettergrade}}</div>
+                                    <div ng-if="grade.currentAvgShowInPie" class="progress-text has-percent">{{grade.currentAvgShowInPie}}</div>
                                     <div class="progress-indicator">
                                         <svg xmlns="http://www.w3.org/2000/svg">
                                             <g >
