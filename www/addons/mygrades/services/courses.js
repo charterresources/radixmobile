@@ -78,7 +78,7 @@ angular.module('mm.addons.mygrades')
             $log.debug('Get courses and grades');
 
             var data = {
-                studentid: $mmSite.currentStudentIdForParent
+                userid: $mmSite.currentStudentIdForParent
             };
 
             var preSets = {
@@ -91,8 +91,9 @@ angular.module('mm.addons.mygrades')
 
             // Get students grades.
             return $mmSite.read('spark_get_student_grades', data, preSets).then(function(mygrades) {
-                if (mygrades) {
-                    angular.forEach(mygrades, function(grade) {
+                if (mygrades.courses) {
+                    var grades = mygrades.courses;
+                    angular.forEach(grades, function(grade) {
                         if(isNaN(grade.progress)) {
                             grade.progress = false;
                             grade.roundProgress = false;
@@ -101,7 +102,7 @@ angular.module('mm.addons.mygrades')
                             grade.roundProgress = true;
                         }
                     });
-                    return mygrades;
+                    return grades;
                 } else {
                     return $q.reject();
                 }

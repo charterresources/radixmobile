@@ -22,17 +22,41 @@ angular.module('mm.addons.mygrades')
  * @name mmaMyGradesCoursesGradesCtrl
  */
 .controller('mmaMyGradesCoursesGradesCtrl', function($scope, $mmSite, $ionicTabsDelegate, $stateParams, $log,
-                                                     $mmaMyCoursesGrades, $mmaMyStudents, $q, $ionicScrollDelegate, $mmUtil) {
+                                                     $mmaMyCoursesGrades, $mmaMyStudents, $q, $ionicScrollDelegate,
+                                                     $mmUtil) {
 
     $log = $log.getInstance('mmaMyGradesCoursesGradesCtrl');
     var scrollView = $ionicScrollDelegate.$getByHandle('mmaMyGradesCoursesGradesListScroll');
     $scope.students = [];
-    $scope.currentStudent = null;
+    // $scope.currentStudent = null;
     $scope.mygradescoursesgrades = null;
     $scope.studentsLoaded = false;
     $scope.isparentuser = $mmSite.getInfo().isparentuser;
 
+    $scope.$on('$ionicView.beforeEnter', function() {
+        autoSelectStudent();
+    });
+
+    function autoSelectStudent() {
+        if($scope.currentStudent != null){
+            if($scope.currentStudent.id !== $mmSite.currentStudentIdForParent){
+                $scope.setCurrentStudentById($mmSite.currentStudentIdForParent);
+            }
+        }
+        else {
+            if ($scope.students.length > 0) {
+                if($mmSite.currentStudentIdForParent != null) {
+                    $scope.setCurrentStudentById($mmSite.currentStudentIdForParent);
+                }
+                else {
+                    $scope.setCurrentStudentById($scope.students[0].id);
+                }
+            }
+        }
+    }
+
     $scope.setCurrentStudentById = function(studentId) {
+        $ionicScrollDelegate.scrollTop();
         for (var i = 0; i < $scope.students.length; i++) {
             if ($scope.students[i].id === studentId) {
                 $scope.currentStudent = $scope.students[i];
@@ -54,16 +78,13 @@ angular.module('mm.addons.mygrades')
     var getStudents = function() {
         return $mmaMyStudents.getMyStudents().then(function(students) {
             $scope.students = students;
-        }).finally(function() {
-            if($stateParams.sid) {
+            if($stateParams.sid != null) {
                 if($scope.students.length > 0) {
                     $scope.setCurrentStudentById($stateParams.sid);
                 }
             }
             else {
-                if($scope.students.length > 0) {
-                    $scope.setCurrentStudentById($scope.students[0].id);
-                }
+                autoSelectStudent();
             }
         });
     };
@@ -75,6 +96,7 @@ angular.module('mm.addons.mygrades')
         }, function(error) {
             $mmUtil.showErrorModalDefault(error, 'mma.grades.nogradesreturned', true);
         }).finally(function () {
+            $scope.mygradescoursesgradesToLoaded = true;
             // Resize the scroll view so infinite loading is able to calculate if it should load more items or not.
             scrollView.resize();
         });
@@ -85,17 +107,12 @@ angular.module('mm.addons.mygrades')
         var promises = [];
         promises.push($mmaMyCoursesGrades.invalidateMyCoursesGradesData());
 
+        $scope.mygradescoursesgradesToLoaded = false;
+
         return $q.all(promises).finally(function() {
             return fetchMyGradesCoursesGrades(true);
         });
     };
 
-    getStudents().then(function() {
-        // Get first assignments.
-        fetchMyGradesCoursesGrades().then(function() {
-            $scope.mygradescoursesgradesToLoaded = true;
-        }).finally(function() {
-            $scope.$broadcast('scroll.infiniteScrollComplete');
-        });
-    });
+    getStudents();
 });

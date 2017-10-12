@@ -22,7 +22,7 @@ angular.module('mm.core.courses')
  * @name mmCoursesListCtrl
  */
 .controller('mmCoursesListCtrl', function($scope, $mmCourses, $mmCoursesDelegate, $mmUtil, $mmEvents, $mmSite, $q,
-            mmCoursesEventMyCoursesUpdated, mmCoreEventSiteUpdated, $mmaMyCoursesGradesQuarter) {
+            mmCoursesEventMyCoursesUpdated, mmCoreEventSiteUpdated, $mmaMyCoursesGradesQuarter, $mmaMyCoursesGrades) {
 
     var updateSiteObserver,
         myCoursesObserver;
@@ -32,30 +32,50 @@ angular.module('mm.core.courses')
 
     // Convenience function to fetch courses.
     function fetchCourses(refresh) {
-        return $mmCourses.getUserCourses().then(function(courses) {
-            $scope.filter.filterText = ''; // Filter value MUST be set after courses are shown.
+        //spark
+        $mmSite.setCurrentStudentId($mmSite.getUserId());
+        return $mmaMyCoursesGrades.getMyGrades(refresh).then(function(e) {
+            $scope.courseswithgrades = e;
 
-            var courseIds = courses.map(function(course) {
-                return course.id;
-            });
+            return $mmCourses.getUserCourses().then(function(courses) {
+                $scope.filter.filterText = ''; // Filter value MUST be set after courses are shown.
 
-            return $mmCourses.getCoursesOptions(courseIds).then(function(options) {
-                angular.forEach(courses, function(course) {
-                    //course.progress = isNaN(parseInt(course.progress, 10)) ? false : parseInt(course.progress, 10);
-                    $mmaMyCoursesGradesQuarter.getMyGradesQuarter(true, $mmSite.getUserId(), course.id).then(function(grade) {
-                        course.isscale = grade[0].isscale;
-                        course.isgraded = grade[0].isgraded;
-                        course.lettergrade = grade[0].lettergrade;
-                        course.progress = grade[0].progress;
-                        course.color = grade[0].color;
-                    });
-                    course.navOptions = options.navOptions[course.id];
-                    course.admOptions = options.admOptions[course.id];
+                var courseIds = courses.map(function(course) {
+                    return course.id;
                 });
-                $scope.courses = courses;
+
+                return $mmCourses.getCoursesOptions(courseIds).then(function(options) {
+
+                    angular.forEach(courses, function(course) {
+                        //course.progress = isNaN(parseInt(course.progress, 10)) ? false : parseInt(course.progress, 10);
+
+                        angular.forEach($scope.courseswithgrades, function(grade) {
+                            if(grade.id == course.id) {
+                                course.q1 = grade.q1;
+                                course.q2 = grade.q2;
+                                course.q3 = grade.q3;
+                                course.q4 = grade.q4;
+                                course.s1 = grade.s1;
+                                course.s2 = grade.s2;
+                                course.avg = grade.avg;
+                            }
+                        });
+
+                        $mmaMyCoursesGradesQuarter.getMyGradesQuarter(true, $mmSite.getUserId(), course.id).then(function(grade) {
+                            course.isscale = grade[0].isscale;
+                            course.isgraded = grade[0].isgraded;
+                            course.lettergrade = grade[0].lettergrade;
+                            course.progress = grade[0].progress;
+                            course.color = grade[0].color;
+                        });
+                        course.navOptions = options.navOptions[course.id];
+                        course.admOptions = options.admOptions[course.id];
+                    });
+                    $scope.courses = courses;
+                });
+            }, function(error) {
+                $mmUtil.showErrorModalDefault(error, 'mm.courses.errorloadcourses', true);
             });
-        }, function(error) {
-            $mmUtil.showErrorModalDefault(error, 'mm.courses.errorloadcourses', true);
         });
     }
 
