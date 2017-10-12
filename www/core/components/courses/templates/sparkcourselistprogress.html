@@ -2,8 +2,7 @@
     <a class="item item-text-wrap item-icon-right item-borderless item-course" ng-class="{'item-progress': roundProgress}" ui-sref="site.mm_course({courseid: course.id, course: course})" title="{{course.fullname}}">
         <div class="spark progress-chart-container" ng-if="roundProgress">
             <div ng-if="course.progress !== false" class="progress-doughnut">
-                <div ng-if="!course.isscale && course.isgraded" class="progress-text has-percent">{{course.progress}}&#37;</div>
-                <div ng-if="course.isscale || !course.isgraded" class="progress-text has-percent">{{course.lettergrade}}</div>
+                <div ng-if="course.currentAvgShowInPie" class="progress-text has-percent">{{course.currentAvgShowInPie}}</div>
                 <div class="progress-indicator">
                     <svg xmlns="http://www.w3.org/2000/svg">
                         <g>
@@ -22,23 +21,25 @@
         <i ng-if="showActions && loaded" class="icon ion-android-more-vertical mm-animate-show-hide" ng-click="showCourseActions($event)"></i>
         <ion-spinner ng-if="!loaded" class="mm-animate-show-hide"></ion-spinner>
     </a>
-    <div style="border-top: none" class="item item-text-wrap row row-center">
-        <p style="margin-bottom: 0px;padding-bottom: 0px;font-weight: bold;text-decoration: underline" class="col text-center" ng-if="course.q1"><mm-format-text watch="true">{{ 'mma.mygrades.q1' | translate}}</mm-format-text></p>
-        <p style="margin-bottom: 0px;padding-bottom: 0px;font-weight: bold;text-decoration: underline" class="col text-center" ng-if="course.q2"><mm-format-text watch="true">{{ 'mma.mygrades.q2' | translate}}</mm-format-text></p>
-        <p style="margin-bottom: 0px;padding-bottom: 0px;font-weight: bold;text-decoration: underline" class="col text-center" ng-if="course.s1"><mm-format-text watch="true">{{ 'mma.mygrades.s1' | translate}}</mm-format-text></p>
-        <p style="margin-bottom: 0px;padding-bottom: 0px;font-weight: bold;text-decoration: underline" class="col text-center" ng-if="course.q3"><mm-format-text watch="true">{{ 'mma.mygrades.q3' | translate}}</mm-format-text></p>
-        <p style="margin-bottom: 0px;padding-bottom: 0px;font-weight: bold;text-decoration: underline" class="col text-center" ng-if="course.q4"><mm-format-text watch="true">{{ 'mma.mygrades.q4' | translate}}</mm-format-text></p>
-        <p style="margin-bottom: 0px;padding-bottom: 0px;font-weight: bold;text-decoration: underline" class="col text-center" ng-if="course.s2"><mm-format-text watch="true">{{ 'mma.mygrades.s2' | translate}}</mm-format-text></p>
-        <p style="margin-bottom: 0px;padding-bottom: 0px;font-weight: bold;text-decoration: underline" class="col text-center" ng-if="course.avg"><mm-format-text watch="true">{{ 'mma.mygrades.avg' | translate}}</mm-format-text></p>
-    </div>
-    <div style="border-top: none" class="item item-text-wrap row row-center">
-        <p class="col text-center" ng-if="course.q1"><mm-format-text watch="true">{{ course.q1 }}</mm-format-text></p>
-        <p class="col text-center" ng-if="course.q2"><mm-format-text watch="true">{{ course.q2 }}</mm-format-text></p>
-        <p class="col text-center" ng-if="course.s1"><mm-format-text watch="true">{{ course.s1 }}</mm-format-text></p>
-        <p class="col text-center" ng-if="course.q3"><mm-format-text watch="true">{{ course.q3 }}</mm-format-text></p>
-        <p class="col text-center" ng-if="course.q4"><mm-format-text watch="true">{{ course.q4 }}</mm-format-text></p>
-        <p class="col text-center" ng-if="course.s2"><mm-format-text watch="true">{{ course.s2 }}</mm-format-text></p>
-        <p class="col text-center" ng-if="course.avg"><mm-format-text watch="true">{{ course.avg }}</mm-format-text></p>
+    <div style="padding-top: 0px;padding-bottom: 0px;" class="item item-text-wrap item-borderless" ng-if="course.q1 || course.q2 || course.q3 || course.q4 || course.s1 || course.s2 || course.avg">
+        <div style="border-top: none" class="item item-text-wrap row row-center">
+            <p style="margin-bottom: 0px;padding-bottom: 0px;font-weight: bold;text-decoration: underline" class="col text-center" ng-if="course.q1"><mm-format-text watch="true">{{ 'mma.mygrades.q1' | translate}}</mm-format-text></p>
+            <p style="margin-bottom: 0px;padding-bottom: 0px;font-weight: bold;text-decoration: underline" class="col text-center" ng-if="course.q2"><mm-format-text watch="true">{{ 'mma.mygrades.q2' | translate}}</mm-format-text></p>
+            <p style="margin-bottom: 0px;padding-bottom: 0px;font-weight: bold;text-decoration: underline" class="col text-center" ng-if="course.s1"><mm-format-text watch="true">{{ 'mma.mygrades.s1' | translate}}</mm-format-text></p>
+            <p style="margin-bottom: 0px;padding-bottom: 0px;font-weight: bold;text-decoration: underline" class="col text-center" ng-if="course.q3"><mm-format-text watch="true">{{ 'mma.mygrades.q3' | translate}}</mm-format-text></p>
+            <p style="margin-bottom: 0px;padding-bottom: 0px;font-weight: bold;text-decoration: underline" class="col text-center" ng-if="course.q4"><mm-format-text watch="true">{{ 'mma.mygrades.q4' | translate}}</mm-format-text></p>
+            <p style="margin-bottom: 0px;padding-bottom: 0px;font-weight: bold;text-decoration: underline" class="col text-center" ng-if="course.s2"><mm-format-text watch="true">{{ 'mma.mygrades.s2' | translate}}</mm-format-text></p>
+            <p style="margin-bottom: 0px;padding-bottom: 0px;font-weight: bold;text-decoration: underline" class="col text-center" ng-if="course.avg"><mm-format-text watch="true">{{ 'mma.mygrades.avg' | translate}}</mm-format-text></p>
+        </div>
+        <div style="border-top: none" class="item item-text-wrap row row-center">
+            <p class="col text-center" ng-if="course.q1"><mm-format-text watch="true">{{ course.q1 }}</mm-format-text></p>
+            <p class="col text-center" ng-if="course.q2"><mm-format-text watch="true">{{ course.q2 }}</mm-format-text></p>
+            <p class="col text-center" ng-if="course.s1"><mm-format-text watch="true">{{ course.s1 }}</mm-format-text></p>
+            <p class="col text-center" ng-if="course.q3"><mm-format-text watch="true">{{ course.q3 }}</mm-format-text></p>
+            <p class="col text-center" ng-if="course.q4"><mm-format-text watch="true">{{ course.q4 }}</mm-format-text></p>
+            <p class="col text-center" ng-if="course.s2"><mm-format-text watch="true">{{ course.s2 }}</mm-format-text></p>
+            <p class="col text-center" ng-if="course.avg"><mm-format-text watch="true">{{ course.avg }}</mm-format-text></p>
+        </div>
     </div>
     <div class="item item-text-wrap item-borderless" ng-show="course.summary" ng-if="showSummary">
         <p>
