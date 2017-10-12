@@ -93,6 +93,19 @@ angular.module('mm.addons.mygrades')
     function fetchMyGradesCoursesGrades(refresh) {
         return  $mmaMyCoursesGrades.getMyGrades(refresh).then(function(e) {
             $scope.mygradescoursesgrades=e;
+            angular.forEach($scope.mygradescoursesgrades, function (grade) {
+                if(grade.isscale) {
+                    grade.currentAvgShowInPie = grade.lettergrade;
+                }
+                else {
+                    if(grade.isgraded) {
+                        grade.currentAvgShowInPie = grade.progress + '%';
+                    }
+                    else {
+                        grade.currentAvgShowInPie = grade.lettergrade;
+                    }
+                }
+            })
         }, function(error) {
             $mmUtil.showErrorModalDefault(error, 'mma.grades.nogradesreturned', true);
         }).finally(function () {

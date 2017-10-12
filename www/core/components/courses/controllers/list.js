@@ -62,11 +62,19 @@ angular.module('mm.core.courses')
                         });
 
                         $mmaMyCoursesGradesQuarter.getMyGradesQuarter(true, $mmSite.getUserId(), course.id).then(function(grade) {
-                            course.isscale = grade[0].isscale;
-                            course.isgraded = grade[0].isgraded;
-                            course.lettergrade = grade[0].lettergrade;
                             course.progress = grade[0].progress;
                             course.color = grade[0].color;
+                            if(grade[0].isscale) {
+                                course.currentAvgShowInPie = grade[0].lettergrade;
+                            }
+                            else {
+                                if(grade[0].isgraded) {
+                                    course.currentAvgShowInPie = grade[0].progress + '%';
+                                }
+                                else {
+                                    course.currentAvgShowInPie = grade[0].lettergrade;
+                                }
+                            }
                         });
                         course.navOptions = options.navOptions[course.id];
                         course.admOptions = options.admOptions[course.id];
