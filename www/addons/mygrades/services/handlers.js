@@ -21,8 +21,7 @@ angular.module('mm.addons.mygrades')
  * @ngdoc service
  * @name $mmaMyGradesHandlers
  */
-    .factory('$mmaMyGradesHandlers', function($mmSite, $mmGrades, $mmaMyCoursesGrades, $state, $mmContentLinksHelper, $mmContentLinkHandlerFactory,
-                                              mmCoursesAccessMethods, mmUserProfileHandlersTypeNewPage) {
+    .factory('$mmaMyGradesHandlers', function($mmSite) {
 
         var self = {};
 
