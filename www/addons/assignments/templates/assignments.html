@@ -4,7 +4,7 @@
 
         <ion-tabs class="spark tabs-positive tabs-top">
 
-            <ion-tab title="{{ 'mma.assignments.missing' | translate}}" badge="currentStudent.numofmissingassignmnets">
+            <ion-tab title="{{ 'mma.assignments.missing' | translate}}" badge="totalmissing">
                 <ion-pane>
                     <ion-content class="has-tabs-top has-footer" mm-state-class delegate-handle="mmaAssignmentsListScroll">
 
@@ -29,12 +29,12 @@
                                     </ul>
                                 </section>
                             </div>
-
+                            <mm-empty-box ng-if="!missingassignments || missingassignments.length == 0" icon="ion-ios-list" message="{{ 'mma.assignments.nomissingassignmentsreturned' | translate }}"></mm-empty-box>
                         </mm-loading>
                     </ion-content>
                 </ion-pane>
             </ion-tab>
-            <ion-tab title="{{ 'mma.assignments.upcoming' | translate}}" badge="currentStudent.numofupcomingassignments">
+            <ion-tab title="{{ 'mma.assignments.upcoming' | translate}}" badge="totalupcoming">
                 <ion-pane>
                     <ion-content class="has-tabs-top  has-footer" mm-state-class delegate-handle="mmaAssignmentsListScroll">
 
@@ -59,12 +59,12 @@
                                     </ul>
                                 </section>
                             </div>
-
+                            <mm-empty-box ng-if="!upcomingassignments || upcomingassignments.length == 0" icon="ion-ios-list" message="{{ 'mma.assignments.noupcomingassignmentsreturned' | translate }}"></mm-empty-box>
                         </mm-loading>
                     </ion-content>
                 </ion-pane>
             </ion-tab>
-            <ion-tab title="{{ 'mma.assignments.lowgrade' | translate}}" badge="currentStudent.numofbelowassignmnets">
+            <ion-tab title="{{ 'mma.assignments.lowgrade' | translate}}" badge="totalbelowgrade">
                 <ion-pane>
                     <ion-content class="has-tabs-top has-footer" mm-state-class delegate-handle="mmaAssignmentsListScroll">
 
@@ -89,7 +89,7 @@
                                     </ul>
                                 </section>
                             </div>
-
+                            <mm-empty-box ng-if="!belowgradesassignments || belowgradesassignments.length == 0" icon="ion-ios-list" message="{{ 'mma.assignments.nolowgradeassignmentsreturned' | translate }}"></mm-empty-box>
                         </mm-loading>
                     </ion-content>
                 </ion-pane>

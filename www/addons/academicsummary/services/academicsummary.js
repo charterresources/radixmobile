@@ -146,7 +146,8 @@ angular.module('mm.addons.academicsummary')
      * @return {Boolean} True if plugin is available, false otherwise.
      */
     self.isPluginEnabled = function() {
-        return $mmSite.wsAvailable('core_message_get_messages') && !$mmSite.getInfo().isparentuser
+        //return $mmSite.wsAvailable('core_message_get_messages') && !$mmSite.getInfo().isparentuser
+        return false;
     };
 
     /**

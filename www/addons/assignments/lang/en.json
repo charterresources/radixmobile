@@ -18,5 +18,8 @@
   "description": "Description",
   "errorloadassignments": "Failed to load assignments",
   "errorloadassignment": "Failed to load assignment",
-  "score": "Score"
+  "score": "Score",
+  "noupcomingassignmentsreturned" : "No upcoming assignments",
+  "nolowgradeassignmentsreturned" : "No low grade assignments",
+  "nomissingassignmentsreturned" : "No missing assignments"
 }

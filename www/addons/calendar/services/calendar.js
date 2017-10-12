@@ -457,7 +457,7 @@ angular.module('mm.addons.calendar')
                     return $q.when();
                 }
 
-                var dateTriggered = new Date((event.timestart - (time * 2880)) * 1000),
+                var dateTriggered = new Date((event.timestart - (time * 60)) * 1000),
                     startDate = new Date(event.timestart * 1000),
                     notification = {
                         id: event.id,
