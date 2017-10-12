@@ -223,6 +223,7 @@ angular.module('mm.core.login')
 
             return promise.then(function(frontpage) {
                 if($mmSite.getInfo().isparentuser) {
+                    $mmSite.currentStudentIdForParent = null;
                     return $state.go('site.mystudents');
                 }
                 // Check avalaibility in priority order.
