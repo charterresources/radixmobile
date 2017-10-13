@@ -60,6 +60,7 @@ angular.module('mm.addons.assignments')
         }
 
         $scope.setCurrentStudentById = function(studentId) {
+            $scope.assignmentsLoaded = false;
             $ionicScrollDelegate.scrollTop();
             for (var i = 0; i < $scope.students.length; i++) {
                 if ($scope.students[i].id === studentId) {
@@ -133,7 +134,6 @@ angular.module('mm.addons.assignments')
             promises.push($mmaAssignments.invalidateStudentUpcomingAssignments());
             promises.push($mmaAssignments.invalidateStudentBelowGradesAssignments());
 
-            $scope.assignmentsLoaded = false;
             $scope.totalmissing = null;
             $scope.totalupcoming = null;
             $scope.totalbelowgrade = null;
