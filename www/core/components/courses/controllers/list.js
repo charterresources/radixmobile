@@ -58,24 +58,23 @@ angular.module('mm.core.courses')
                                 course.s1 = grade.s1;
                                 course.s2 = grade.s2;
                                 course.avg = grade.avg;
+
+                                course.progress = grade.progress;
+                                course.color = grade.color;
+                                if(grade.isscale) {
+                                    course.currentAvgShowInPie = grade.lettergrade;
+                                }
+                                else {
+                                    if(grade.isgraded) {
+                                        course.currentAvgShowInPie = grade.progress + '%';
+                                    }
+                                    else {
+                                        course.currentAvgShowInPie = grade.lettergrade;
+                                    }
+                                }
                             }
                         });
 
-                        $mmaMyCoursesGradesQuarter.getMyGradesQuarter(true, $mmSite.getUserId(), course.id).then(function(grade) {
-                            course.progress = grade[0].progress;
-                            course.color = grade[0].color;
-                            if(grade[0].isscale) {
-                                course.currentAvgShowInPie = grade[0].lettergrade;
-                            }
-                            else {
-                                if(grade[0].isgraded) {
-                                    course.currentAvgShowInPie = grade[0].progress + '%';
-                                }
-                                else {
-                                    course.currentAvgShowInPie = grade[0].lettergrade;
-                                }
-                            }
-                        });
                         course.navOptions = options.navOptions[course.id];
                         course.admOptions = options.admOptions[course.id];
                     });
