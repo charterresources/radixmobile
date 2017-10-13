@@ -56,6 +56,7 @@ angular.module('mm.addons.mygrades')
     }
 
     $scope.setCurrentStudentById = function(studentId) {
+        $scope.mygradescoursesgradesToLoaded = false;
         $ionicScrollDelegate.scrollTop();
         for (var i = 0; i < $scope.students.length; i++) {
             if ($scope.students[i].id === studentId) {
@@ -120,10 +121,10 @@ angular.module('mm.addons.mygrades')
         var promises = [];
         promises.push($mmaMyCoursesGrades.invalidateMyCoursesGradesData());
 
-        $scope.mygradescoursesgradesToLoaded = false;
-
         return $q.all(promises).finally(function() {
-            return fetchMyGradesCoursesGrades(true);
+            return fetchMyGradesCoursesGrades(true).then(function() {
+                $scope.$broadcast('scroll.infiniteScrollComplete');
+            });
         });
     };
 
