@@ -11,6 +11,15 @@
                     <li class="item item-media item-text-wrap" ng-if="title">
                         <img ng-src="{{icon}}">
                         <h2><mm-format-text watch="true">{{title}}</mm-format-text></h2>
+
+                        <p ng-if="excluded" class="badge badge-inline text-center badge-balanced"
+                           style="line-height: 14px; font-weight: bold; font-size: 12px;">
+                            {{ 'mma.mygrades.excluded' | translate }}
+                        </p>
+                        <p ng-if="missed" class="badge badge-inline text-center badge-assertive"
+                           style="line-height: 14px; font-weight: bold; font-size: 12px;">
+                            {{ 'mma.mygrades.missing' | translate }}
+                        </p>
                     </li>
                     <li class="item item-text-wrap" ng-if="description">
                         <h3>{{ 'mma.assignments.description' | translate}}</h3>

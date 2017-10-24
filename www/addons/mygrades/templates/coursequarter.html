@@ -50,17 +50,23 @@
                             <p style="margin-bottom: 0px;padding-bottom: 0px;font-weight: bold;text-decoration: underline" class="col col-75 text-left"><mm-format-text watch="true">{{ 'mma.assignments.assignment' | translate }}</mm-format-text></p>
                             <p style="margin-bottom: 0px;padding-bottom: 0px;font-weight: bold;text-decoration: underline" class="col col-25 text-center"><mm-format-text watch="true">{{ 'mma.assignments.score' | translate }}</mm-format-text></p>
                         </div>
-                        <div style="border-top: none" class="item item-text-wrap row row-center" ng-repeat="assignment in category.assignments" mm-split-view-link="site.assignment({sid: studentid, gid: assignment.gradeid})">
+                        <div style="border-top: none" class="item item-text-wrap row row-center"
+                             ng-repeat="assignment in category.assignments"
+                             mm-split-view-link="site.assignment({sid: studentid, cmid: assignment.cmid})">
                             <img ng-src="{{assignment.icon}}" title="{{assignment.title}}" class="col col-10"/>
                             <a class="col col-65"  title="{{assignment.title}}">
-                                <p><mm-format-text watch="true">{{assignment.title}}</mm-format-text></p>
+                                <p>
+                                    <mm-format-text watch="true">{{assignment.title}}</mm-format-text>
+                                    <span ng-if="assignment.missed" class="badge badge-inline text-center assertive">{{ 'mma.mygrades.missing' | translate }}</span>
+                                    <span ng-if="assignment.excluded" class="badge badge-inline text-center balanced">{{ 'mma.mygrades.excluded' | translate }}</span>
+                                </p>
                             </a>
                             <a class="col col-25 text-center"  title="{{assignment.score}}">
                                 <p><mm-format-text watch="true">{{assignment.score}}</mm-format-text></p>
                             </a>
                         </div>
                         <div style="border-top: none" class="item row row-right">
-                            <p style="font-weight: bold;" class="col col-offset-34 text-left"><mm-format-text watch="true">{{ 'mm.grades.average' | translate }}: {{category.average}} / {{category.max}}</mm-format-text></p>
+                            <p style="font-weight: bold;" class="col col-offset-25 text-left"><mm-format-text watch="true">{{ 'mm.grades.average' | translate }}: {{category.average}}</mm-format-text></p>
                         </div>
                     </li>
                     <li style="border-top: none;padding-top: 0px;padding-bottom: 0px;" class="item item-text-wrap" ng-if="category.assignments.length==0">
