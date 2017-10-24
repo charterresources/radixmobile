@@ -49,6 +49,15 @@ angular.module('mm.addons.notifications')
                 notification.courseid = cid[1];
             }
 
+            //SPARK start
+
+            $params = $mmUtil.extractUrlParams(notification.contexturl);
+            // Try to set student id the notification belongs to.
+            notification.sid = $params.asid;
+            // Try to set course module id the notification belongs to.
+            notification.cmid = $params.id;
+            //SPARK end
+
             // Try to get the profile picture of the user.
             $mmUser.getProfile(notification.useridfrom, notification.courseid, true).then(function(user) {
                 notification.profileimageurlfrom = user.profileimageurl;

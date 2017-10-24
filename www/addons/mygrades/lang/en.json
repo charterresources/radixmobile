@@ -10,5 +10,7 @@
   "avg": "Avg",
   "categoryweight": "Category weight",
   "nogradedassignmentsincategory": "No graded assignments in this category",
-  "currentgradingterm": "Current grading term"
+  "currentgradingterm": "Current grading term",
+  "missing": "Missing",
+  "excluded": "Excluded"
 }

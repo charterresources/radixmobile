@@ -38,12 +38,14 @@ angular.module('mm.addons.mygrades')
         $scope.studentfullname = null;
         $scope.description = null;
         $scope.score = null;
+        $scope.missed = false;
+        $scope.excluded = false;
 
         // Convenience function that fetches the assignment and updates the scope.
         function fetchAssignment(refresh) {
             return $mmUser.getUserFromWS($stateParams.sid).then(function (student) {
                 $scope.studentfullname = student.fullname;
-                return $mmaMyCoursesGradesAssignment.getStudentAssignment(refresh, $stateParams.sid, $stateParams.gid).then(function(e) {
+                return $mmaMyCoursesGradesAssignment.getStudentAssignment(refresh, $stateParams.sid, $stateParams.cmid).then(function(e) {
                     $scope.coursename = e.coursename;
                     $scope.duedate = e.duedate;
                     $scope.dategraded = e.dategraded;
@@ -52,6 +54,8 @@ angular.module('mm.addons.mygrades')
                     $scope.feedback = e.feedback;
                     $scope.icon = e.icon;
                     $scope.score = e.score;
+                    $scope.missed = e.missed;
+                    $scope.excluded = e.excluded;
                     $scope.description = $sce.trustAsHtml(e.description);
                 }, function(error) {
                     $mmUtil.showErrorModalDefault(error, 'mma.assignments.errorloadassignment', true);
