@@ -220,12 +220,18 @@ angular.module('mm.core.login')
             } else {
                 promise = $q.when(false);
             }
-
+            ///spark begin
+            $mmSite.isParentUser = $mmSite.getInfo().isparentuser;
+            $mmSite.isStudentUser = $mmSite.getInfo().isstudentuser;
+            $mmSite.isTeacherUser = $mmSite.getInfo().isteacheruser;
+            ///spark end
             return promise.then(function(frontpage) {
-                if($mmSite.getInfo().isparentuser) {
+                ///spark begin
+                if($mmSite.isParentUser) {
                     $mmSite.currentStudentIdForParent = null;
                     return $state.go('site.mystudents');
                 }
+                ///spark end
                 // Check avalaibility in priority order.
                 if (frontpage) {
                     return $state.go('site.frontpage');
