@@ -49,13 +49,13 @@ angular.module('mm.addons.mygrades')
          * @param {int} [gid] Unique id from table {grades_grade}, each assignment has unique gid.
          * @return {Promise}           Promise resolved with notifications.
          */
-        self.getStudentAssignment = function(refresh, sid,  gid) {
+        self.getStudentAssignment = function(refresh, sid,  cmid) {
 
             $log.debug('Get student assignment');
 
             var data = {
                 sid: sid,
-                gid: gid
+                cmid: cmid
             };
 
             var preSets = {

@@ -43,7 +43,7 @@ angular.module('mm.addons.mygrades', [])
                 }
             })
             .state('site.assignment', {
-                url: '/assignment/:sid/:gid',
+                url: '/assignment/:sid/:cmid',
                 views: {
                     'site': {
                         controller: 'mmaMyGradesCoursesGradesAssignmentCtrl',
