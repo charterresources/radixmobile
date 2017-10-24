@@ -15,9 +15,11 @@
                     <li class="item">
                         <h3>{{assignmenttype}}</h3>
                     </li>
-                    <li class="item item-media item-text-wrap" ng-if="title">
+                    <li class="item item-media item-text-wrap" ng-if="title" ng-click="isstudentuser && goToAssignment()">
                         <img ng-src="{{icon}}">
-                        <h2><mm-format-text watch="true">{{title}}</mm-format-text></h2>
+                        <h2 style="padding-right: 5px;"><mm-format-text watch="true">{{title}}</mm-format-text></h2>
+                        <i ng-if="isstudentuser" class="icon ion-ios-arrow-right" style="width: 20px; right: 0;top: 18px;
+                                                                       position: absolute; font-size: 25px;"></i>
                     </li>
                     <li class="item item-text-wrap" ng-if="description">
                         <h3>{{ 'mma.assignments.description' | translate}}</h3>
