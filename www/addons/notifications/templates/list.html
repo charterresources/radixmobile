@@ -14,8 +14,15 @@
                 <div class="item item-body">
                     <p><mm-format-text watch="true">{{ notification.mobiletext | mmCreateLinks | mmaNotificationsFormat }}</mm-format-text></p>
                 </div>
-                <mma-notifications-actions contexturl="notification.contexturl" courseid="notification.courseid"></mma-notifications-actions>
+                <mma-notifications-actions ng-if="!notification.sid" contexturl="notification.contexturl" courseid="notification.courseid"></mma-notifications-actions>
+                <div ng-if="notification.sid" class="item tabs tabs-icon-left">
+                    <a class="tab-item"  ng-click="action.action()" ui-sref="site.assignment({sid: notification.sid, cmid: notification.cmid})">
+                        <i class="icon ion-eye"></i>
+                        {{ 'mm.core.view' | translate }}
+                    </a>
+                </div>
             </article>
+
 
             <mm-empty-box ng-if="!notifications || notifications.length <= 0" icon="ion-ios-bell" message="{{ 'mma.notifications.therearentnotificationsyet' | translate }}"></mm-empty-box>
 
