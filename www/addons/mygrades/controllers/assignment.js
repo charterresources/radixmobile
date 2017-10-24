@@ -46,17 +46,17 @@ angular.module('mm.addons.mygrades')
             return $mmUser.getUserFromWS($stateParams.sid).then(function (student) {
                 $scope.studentfullname = student.fullname;
                 return $mmaMyCoursesGradesAssignment.getStudentAssignment(refresh, $stateParams.sid, $stateParams.cmid).then(function(e) {
-                    $scope.coursename = e.coursename;
-                    $scope.duedate = e.duedate;
-                    $scope.dategraded = e.dategraded;
-                    $scope.title = e.title;
-                    $scope.itemmodule = e.itemmodule;
-                    $scope.feedback = e.feedback;
-                    $scope.icon = e.icon;
-                    $scope.score = e.score;
-                    $scope.missed = e.missed;
-                    $scope.excluded = e.excluded;
-                    $scope.description = $sce.trustAsHtml(e.description);
+                    $scope.coursename   = e.coursename;
+                    $scope.duedate      = e.duedate;
+                    $scope.dategraded   = e.dategraded;
+                    $scope.title        = e.title;
+                    $scope.itemmodule   = e.itemmodule;
+                    $scope.feedback     = e.feedback;
+                    $scope.icon         = e.icon;
+                    $scope.score        = e.score;
+                    $scope.missed       = e.missed;
+                    $scope.excluded     = e.excluded;
+                    $scope.description  = $sce.trustAsHtml(e.description);
                 }, function(error) {
                     $mmUtil.showErrorModalDefault(error, 'mma.assignments.errorloadassignment', true);
                 });
@@ -84,5 +84,13 @@ angular.module('mm.addons.mygrades')
             $scope.assignmentLoaded = true;
         }).finally(function() {
             $scope.$broadcast('scroll.infiniteScrollComplete');
+        });
+
+        // Refresh when entering again.
+        $scope.$on('$ionicView.enter', function() {
+            $scope.assignmentLoaded = false;
+            $scope.refreshAssignment().then(function () {
+                $scope.assignmentLoaded = true;
+            });
         });
     });
