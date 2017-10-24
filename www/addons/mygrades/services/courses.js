@@ -61,7 +61,7 @@ angular.module('mm.addons.mygrades')
          * @return {Boolean}         True if plugin is enabled, false otherwise.
          */
         self.isPluginEnabled = function() {
-            return $mmSite.getInfo().isparentuser;
+            return $mmSite.isParentUser;
         };
 
         /**
