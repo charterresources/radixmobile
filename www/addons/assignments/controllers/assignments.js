@@ -35,7 +35,7 @@ angular.module('mm.addons.assignments')
         $scope.belowgradesassignments = null;
         $scope.totalbelowgrade = null;
         $scope.studentsLoaded = false;
-        $scope.isparentuser = $mmSite.getInfo().isparentuser;
+        $scope.isparentuser = $mmSite.isParentUser;
 
         $scope.$on('$ionicView.beforeEnter', function() {
             autoSelectStudent();

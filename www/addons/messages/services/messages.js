@@ -1064,7 +1064,7 @@ angular.module('mm.addons.messages')
      * @return {Boolean}
      */
     self.isSearchContactsEnabled = function() {
-        return $mmSite.wsAvailable('core_message_search_contacts') && !$mmSite.getInfo().isparentuser && !$mmSite.getInfo().isstudentuser;
+        return $mmSite.wsAvailable('core_message_search_contacts') && !$mmSite.isParentUser && !$mmSite.isStudentUser;
     };
 
     /**

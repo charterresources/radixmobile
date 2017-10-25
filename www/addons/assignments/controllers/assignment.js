@@ -21,12 +21,13 @@ angular.module('mm.addons.assignments')
  * @ngdoc controller
  * @name mmaAssignmentCtrl
  */
-    .controller('mmaAssignmentCtrl', function($scope, $log, $stateParams, $mmaAssignments, $mmUser,
+    .controller('mmaAssignmentCtrl', function($scope, $log, $state, $stateParams, $mmaAssignments, $mmUser,
                                               $mmSite, $translate, $sce, $q, $ionicScrollDelegate, $mmUtil) {
 
         $log = $log.getInstance('mmaAssignmentCtrl');
 
         var scrollView = $ionicScrollDelegate.$getByHandle('mmaAssignmentScroll');
+        $scope.courseid = null;
         $scope.coursename = null;
         $scope.dategraded = null;
         $scope.grademax = null;
@@ -37,6 +38,8 @@ angular.module('mm.addons.assignments')
         $scope.studentfullname = null;
         $scope.assignmenttype = null;
         $scope.description = null;
+        $scope.module = null;
+        $scope.isstudentuser = $mmSite.isStudentUser;
 
         // Convenience function that fetches the assignment and updates the scope.
         function fetchAssignment(refresh) {
@@ -49,6 +52,7 @@ angular.module('mm.addons.assignments')
                             for (var i = 0; i < e.length; i++) {
                                 for (var j = 0; j < e[i].missingassignments.length; j++) {
                                     if($stateParams.id == e[i].missingassignments[j].coursemoduleid) {
+                                        $scope.courseid = e[i].courseid;
                                         $scope.coursename = e[i].coursename;
                                         $scope.duedate = e[i].missingassignments[j].duedate;
                                         $scope.dategraded = e[i].missingassignments[j].dategraded;
@@ -59,6 +63,12 @@ angular.module('mm.addons.assignments')
                                         $scope.icon = e[i].missingassignments[j].icon;
                                         $scope.assignmenttype = $translate.instant('mma.assignments.missingassignment');
                                         $scope.description = $sce.trustAsHtml(e[i].missingassignments[j].description);
+                                        $scope.module = {
+                                            id: e[i].missingassignments[j].coursemoduleid,
+                                            name: e[i].missingassignments[j].title,
+                                            description: $sce.trustAsHtml(e[i].missingassignments[j].description),
+                                            url: e[i].missingassignments[j].url
+                                        };
                                         break;
                                     }
                                 }
@@ -72,6 +82,7 @@ angular.module('mm.addons.assignments')
                             for (var i = 0; i < e.length; i++) {
                                 for (var j = 0; j < e[i].upcomingassignments.length; j++) {
                                     if($stateParams.id == e[i].upcomingassignments[j].coursemoduleid) {
+                                        $scope.courseid = e[i].courseid;
                                         $scope.coursename = e[i].coursename;
                                         $scope.duedate = e[i].upcomingassignments[j].duedate;
                                         $scope.dategraded = e[i].upcomingassignments[j].dategraded;
@@ -82,6 +93,12 @@ angular.module('mm.addons.assignments')
                                         $scope.icon = e[i].upcomingassignments[j].icon;
                                         $scope.assignmenttype = $translate.instant('mma.assignments.upcomingassignment');
                                         $scope.description = $sce.trustAsHtml(e[i].upcomingassignments[j].description);
+                                        $scope.module = {
+                                            id: e[i].upcomingassignments[j].coursemoduleid,
+                                            name: e[i].upcomingassignments[j].title,
+                                            description: $sce.trustAsHtml(e[i].upcomingassignments[j].description),
+                                            url: e[i].upcomingassignments[j].url
+                                        };
                                         break;
                                     }
                                 }
@@ -95,6 +112,7 @@ angular.module('mm.addons.assignments')
                             for (var i = 0; i < e.length; i++) {
                                 for (var j = 0; j < e[i].belowgrades.length; j++) {
                                     if($stateParams.id == e[i].belowgrades[j].coursemoduleid) {
+                                        $scope.courseid = e[i].courseid;
                                         $scope.coursename = e[i].coursename;
                                         $scope.dategraded = e[i].belowgrades[j].dategraded;
                                         $scope.grademax = e[i].belowgrades[j].grademax;
@@ -104,6 +122,12 @@ angular.module('mm.addons.assignments')
                                         $scope.icon = e[i].belowgrades[j].icon;
                                         $scope.assignmenttype = $translate.instant('mma.assignments.lowgradeassignment');
                                         $scope.description = $sce.trustAsHtml(e[i].belowgrades[j].description);
+                                        $scope.module = {
+                                            id: e[i].belowgrades[j].coursemoduleid,
+                                            name: e[i].belowgrades[j].title,
+                                            description: $sce.trustAsHtml(e[i].belowgrades[j].description),
+                                            url: e[i].belowgrades[j].url
+                                        };
                                         break;
                                     }
                                 }
@@ -149,4 +173,10 @@ angular.module('mm.addons.assignments')
         }).finally(function() {
             $scope.$broadcast('scroll.infiniteScrollComplete');
         });
+
+        $scope.goToAssignment = function() {
+            if($mmSite.isStudentUser) {
+                $state.go('site.mod_assign', {module: $scope.module, courseid: $scope.courseid});
+            }
+        }
     });

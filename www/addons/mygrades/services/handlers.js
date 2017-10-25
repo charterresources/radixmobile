@@ -45,7 +45,7 @@ angular.module('mm.addons.mygrades')
              *                           rejected promise or false.
              */
             self.isEnabled = function() {
-                return $mmSite.getInfo().isparentuser;
+                return $mmSite.isParentUser;
             };
 
             /**

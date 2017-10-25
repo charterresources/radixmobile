@@ -31,7 +31,7 @@ angular.module('mm.addons.mygrades')
     // $scope.currentStudent = null;
     $scope.mygradescoursesgrades = null;
     $scope.studentsLoaded = false;
-    $scope.isparentuser = $mmSite.getInfo().isparentuser;
+    $scope.isparentuser = $mmSite.isParentUser;
 
     $scope.$on('$ionicView.beforeEnter', function() {
         autoSelectStudent();

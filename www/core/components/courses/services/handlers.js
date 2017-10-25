@@ -297,7 +297,7 @@ angular.module('mm.core.courses')
          */
         self.isEnabled = function() {
             //Check if user is parent user, so don't register my courses component.
-            if($mmSite.getInfo().isparentuser) {
+            if($mmSite.isParentUser) {
                 return false;
             }
             var myCoursesDisabled = $mmCourses.isMyCoursesDisabledInSite();

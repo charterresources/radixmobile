@@ -573,7 +573,9 @@ angular.module('mm.core')
         self.currentStudentIdForParent = studentId;
     };
     self.currentStudentIdForParent = null;
-
+    self.isParentUser = null;
+    self.isStudentUser = null;
+    self.isTeacherUser = null;
     /**
      * Check if the user is logged in a site.
      *
