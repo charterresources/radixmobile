@@ -23,7 +23,7 @@ angular.module('mm.addons.mygrades')
  */
 .controller('mmaMyGradesCoursesGradesCtrl', function($scope, $mmSite, $ionicTabsDelegate, $stateParams, $log,
                                                      $mmaMyCoursesGrades, $mmaMyStudents, $q, $ionicScrollDelegate,
-                                                     $mmUtil) {
+                                                     $mmUtil, $mmaMessagesHandlers) {
 
     $log = $log.getInstance('mmaMyGradesCoursesGradesCtrl');
     var scrollView = $ionicScrollDelegate.$getByHandle('mmaMyGradesCoursesGradesListScroll');
@@ -32,6 +32,8 @@ angular.module('mm.addons.mygrades')
     $scope.mygradescoursesgrades = null;
     $scope.studentsLoaded = false;
     $scope.isparentuser = $mmSite.isParentUser;
+    $scope.ischatenabled = false;
+    $scope.chatimgurl = "img/mod/chat.svg";
 
     $scope.$on('$ionicView.beforeEnter', function() {
         autoSelectStudent();
@@ -64,6 +66,7 @@ angular.module('mm.addons.mygrades')
                 if(!$mmSite.currentStudentIdForParent || $mmSite.currentStudentIdForParent !== studentId) {
                     $mmSite.setCurrentStudentId(studentId);
                 }
+                $scope.ischatenabled = $mmaMessagesHandlers.sendMessage().isEnabledForUser($scope.currentStudent);
                 break;
             }
         }
