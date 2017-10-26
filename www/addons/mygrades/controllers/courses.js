@@ -32,6 +32,7 @@ angular.module('mm.addons.mygrades')
     $scope.mygradescoursesgrades = null;
     $scope.studentsLoaded = false;
     $scope.isparentuser = $mmSite.isParentUser;
+    $scope.chatimgurl = "img/mod/chat.svg";
 
     $scope.$on('$ionicView.beforeEnter', function() {
         autoSelectStudent();

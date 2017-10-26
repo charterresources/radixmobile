@@ -53,7 +53,12 @@
                     </li>
                     <li style="padding-top: 5px;padding-bottom: 5px;" class="item item-text-wrap" ng-if="grade.teachername">
                         <h3 style="display:inline-block">{{ 'mm.user.editingteacher' | translate}}</h3>
-                        <p style="display:inline-block"><mm-format-text watch="true">{{grade.teachername}}</mm-format-text></p>
+                        <p style="display:inline-block">
+                            <mm-format-text watch="true">{{grade.teachername}}</mm-format-text>
+                            <a ng-if="grade.ischatenabled" ui-sref="site.messages-discussion({userId: grade.teacherid, showKeyboard: true})">
+                                <img ng-src="{{chatimgurl}}" style="vertical-align: bottom;">
+                            </a>
+                        </p>
                     </li>
                 </ul>
             </article>
